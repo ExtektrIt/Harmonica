@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/l_file_list"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/tv_file_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginStart="85dp"
+        android:layout_marginEnd="30dp"
+        android:text="File name"
+        android:textSize="20sp"
+        android:textColor="#55dddd"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+
+        android:ellipsize="end"
+        android:singleLine="true"
+        />
+
+    <TextView
+        android:id="@+id/tv_path_file"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="30dp"
+        android:text="Path file"
+        android:textSize="11sp"
+        android:textColor="#88dddd"
+        app:layout_constraintTop_toBottomOf="@+id/tv_file_name"
+        app:layout_constraintStart_toStartOf="parent"
+
+        android:ellipsize="start"
+        android:singleLine="true"
+        />
+
+    <ImageView
+        android:id="@+id/iv_ic_folder"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/sym_contact_card" />
+
+    <CheckBox
+        android:id="@+id/cb"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:cursorVisible="false"
+        android:layout_marginTop="2dp"
+        android:onClick="checkItem"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_path_file"
+        android:layout_marginHorizontal="30dp"
+        android:background="@color/selected_view_holder" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
