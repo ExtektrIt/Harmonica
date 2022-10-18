@@ -3,21 +3,15 @@ package com.andrey.guryanov.harmonica;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.icu.util.Calendar;
-import android.media.MediaParser;
 import android.os.Bundle;
-import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.andrey.guryanov.harmonica.utils.App;
 
-import java.text.DateFormat;
-import java.text.Format;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -115,8 +109,8 @@ public class MainActivity extends AppCompatActivity {
 
         player.initPlayer(viewArray);
 
-        if (player.getCurrentSong().getID() != 0) {                                                 //если текущая песня задана
-            player.showSongInfo();                                                                  //отображает данные текущей песни на экране
+        if (player.getCurrentTrack().getID() != 0) {                                                //если текущая песня задана
+            player.showTrackInfo();                                                                 //отображает данные текущей песни на экране
             player.changePlayButton();                                                              //нужен для того, чтобы при перевороте экрана кнопка плей отображалась корректно
         }
     }
@@ -150,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
 //        app.getViews().add(trackInfo);      //7
 //        app.giveViewsToPlayer();                                                                    //отправляет заполненный массив с Вьюшками в плеер
 //
-//        if (player.getCurrentSong().getID() != 0) {                                                 //если текущая песня задана
+//        if (player.getCurrentTrack().getID() != 0) {                                                 //если текущая песня задана
 //            app.showInfo();                                                                         //отображает данные текущей песни на экране
 //            player.changePlayButton();                                                              //нужен для того, чтобы при перевороте экрана кнопка плей отображалась корректно
 //        }
@@ -163,21 +157,21 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void goToSongList(View v) {
-        Intent intent = new Intent(this, SongList.class);
+    public void goToTrackList(View v) {
+        Intent intent = new Intent(this, TrackList.class);
         startActivity(intent);
     }
 
 
-    public void playSong(View v) {
+    public void playTrack(View v) {
         player.playFromMain();
     }
 
-    public void nextSong(View v) {
+    public void nextTrack(View v) {
         player.next();
     }
 
-    public void prevSong(View v) {
+    public void prevTrack(View v) {
         player.prev();
     }
 

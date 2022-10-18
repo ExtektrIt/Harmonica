@@ -26,7 +26,7 @@
         android:requestLegacyExternalStorage="true"
         tools:targetApi="31">
         <activity
-            android:name=".SongList"
+            android:name=".TrackList"
             android:exported="false" />
         <activity
             android:name=".testFunction"

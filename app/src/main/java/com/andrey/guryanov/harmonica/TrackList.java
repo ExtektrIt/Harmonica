@@ -4,25 +4,24 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
 import com.andrey.guryanov.harmonica.utils.App;
 
-public class SongList extends AppCompatActivity {
+public class TrackList extends AppCompatActivity {
 
     private App app;
     private PlayList playList;
-    private RecyclerView songList;
-    private TextView playListName, countSongs;
+    private RecyclerView trackList;
+    private TextView playListName, countTracks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_song_list);
+        setContentView(R.layout.activity_track_list);
 
         playList = App.getPlayer().getCurrentPlayList();
 
@@ -45,20 +44,20 @@ public class SongList extends AppCompatActivity {
 //    }
 
     protected void initViews() {
-        songList = findViewById(R.id.rv_song_list);
+        trackList = findViewById(R.id.rv_track_list);
         playListName = findViewById(R.id.tv_playlist_name);
-        countSongs = findViewById(R.id.tv_count_songs);
+        countTracks = findViewById(R.id.tv_count_tracks);
 
         playListName.setText(playList.getName());
-        countSongs.setText(String.valueOf(playList.getCountSongs()));
+        countTracks.setText(String.valueOf(playList.getCountTracks()));
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        songList.setLayoutManager(layoutManager);
+        trackList.setLayoutManager(layoutManager);
     }
 
     public void startAdapter() {
-        SongListAdapter adapter = new SongListAdapter(this, playList);
-        songList.setAdapter(adapter);
+        TrackListAdapter adapter = new TrackListAdapter(this, playList);
+        trackList.setAdapter(adapter);
     }
 
     public void refresh(View view) {

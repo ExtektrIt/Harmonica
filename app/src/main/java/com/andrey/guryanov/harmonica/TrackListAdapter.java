@@ -15,9 +15,9 @@ import com.andrey.guryanov.harmonica.utils.App;
 
 import java.util.List;
 
-public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.ViewHolder> {
+public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewHolder> {
 
-    private final List<Song> songs;
+    private final List<Track> tracks;
     private final LayoutInflater inflater;
     private final Context parent;
     private final int COLOR_APP = Color.parseColor("#55dddd");
@@ -35,9 +35,9 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.ViewHo
     private final PlayList playList;
 
 
-    public SongListAdapter(Context parent, PlayList playList) {
+    public TrackListAdapter(Context parent, PlayList playList) {
         this.parent = parent;
-        this.songs = playList.getSongs();
+        this.tracks = playList.getTracks();
         this.inflater = LayoutInflater.from(parent);
         //this.player = player;
         this.playList = playList;
@@ -47,29 +47,29 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.ViewHo
 
     @NonNull
     @Override
-    public SongListAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = inflater.inflate(R.layout.song_list, parent, false);
+    public TrackListAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = inflater.inflate(R.layout.track_list, parent, false);
 
         viewHolderCount++;  //тест
 
         ViewHolder newHolder = new ViewHolder(view);
-        newHolder.songAttr.setText(String.valueOf(viewHolderCount));
+        newHolder.trackAttr.setText(String.valueOf(viewHolderCount));
         return newHolder;
         //return new ViewHolder(view, viewHolderCount);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull SongListAdapter.ViewHolder holder, int position) {
-        Song song = songs.get(position);
-        //holder.songName.setText("Песня № " + position);//(song.getName());
-        holder.songName.setText(song.getName());
+    public void onBindViewHolder(@NonNull TrackListAdapter.ViewHolder holder, int position) {
+        Track track = tracks.get(position);
+        //holder.songName.setText("Песня № " + position);//(track.getName());
+        holder.trackName.setText(track.getName());
         //holder.songAttr.setText(String.valueOf(viewHolderCount));  //test
         //holder.songAttr.setBackgroundColor(holder.layout.getSolidColor());
         //holder.layout.getBackground().
 
 
 
-        if (song.getID() == playList.getCurrentSong().getID()) {                                    //если это текущая песня в плейлисте
+        if (track.getID() == playList.getCurrentTrack().getID()) {                                    //если это текущая песня в плейлисте
             selectHolder(holder);
 //            holder.layout.setBackgroundColor(Color.parseColor("#55dddd"));   //цвет "app"
 //            holder.songName.setTextColor(Color.parseColor("#ffffff"));  //белый
@@ -102,19 +102,19 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.ViewHo
 
     @Override
     public int getItemCount() {
-        return songs.size();
+        return tracks.size();
     }
 
     public void unSelectHolder(ViewHolder holder) {
         //currentHolder.
         holder.layout.setBackground(null);
-        holder.songName.setTextColor(COLOR_APP);
+        holder.trackName.setTextColor(COLOR_APP);
     }
 
     public void selectHolder(ViewHolder holder) {
         currentHolder = holder;
         holder.layout.setBackgroundColor(COLOR_APP);
-        holder.songName.setTextColor(COLOR_WHITE);
+        holder.trackName.setTextColor(COLOR_WHITE);
         //layout.setBackgroundColor(R.color.app);
         //songName.setTextColor(R.color.white);
         //empty.setBackgroundColor(R.color.app);
@@ -125,7 +125,7 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.ViewHo
 
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        final TextView songName, songAttr;
+        final TextView trackName, trackAttr;
         //final View layout;
         final ConstraintLayout layout;
         View view, empty;
@@ -133,25 +133,25 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.ViewHo
         ViewHolder(View view){
 
             super(view);
-            songName = view.findViewById(R.id.tv_song_name);
-            songAttr = view.findViewById(R.id.tv_song_attr);
+            trackName = view.findViewById(R.id.tv_track_name);
+            trackAttr = view.findViewById(R.id.tv_track_attr);
 
             this.view = view;
-            layout = view.findViewById(R.id.l_song_list);
+            layout = view.findViewById(R.id.l_track_list);
             //empty = view.findViewById(R.id.v_song_list);
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     int position = getBindingAdapterPosition();
-                    Song song = songs.get(position);
+                    Track track = tracks.get(position);
 
                     if (currentHolder != null) unSelectHolder(currentHolder);                       //если есть выбранный холдер, то отменяем его выбор
                     selectHolder(getThisHolder());
 
-                    if (song.getID() != playList.getCurrentSong().getID()) {                        //если выбранная песня не является текущей
-                        playList.setCurrentSong(song);                                              //задаём выбранную песню как текущую в плейлисте
-                        App.getPlayer().playFromSongList();                                                     //запускаем текущую песню плейлиста
+                    if (track.getID() != playList.getCurrentTrack().getID()) {                        //если выбранная песня не является текущей
+                        playList.setCurrentTrack(track);                                              //задаём выбранную песню как текущую в плейлисте
+                        App.getPlayer().playFromTrackList();                                                     //запускаем текущую песню плейлиста
                     }
 
 

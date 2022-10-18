@@ -24,7 +24,7 @@
             android:layout_margin="10dp"
             android:layout_weight="1"
             android:contentDescription="@string/app_name"
-            android:onClick="prevSong"
+            android:onClick="prevTrack"
             app:srcCompat="@android:drawable/ic_media_previous" />
 
         <ImageButton
@@ -34,7 +34,7 @@
             android:layout_marginHorizontal="10dp"
             android:layout_weight="1"
             android:contentDescription="@string/app_name"
-            android:onClick="playSong"
+            android:onClick="playTrack"
             app:srcCompat="@android:drawable/ic_media_play" />
 
         <ImageButton
@@ -44,7 +44,7 @@
             android:layout_margin="10dp"
             android:layout_weight="1"
             android:contentDescription="@string/app_name"
-            android:onClick="nextSong"
+            android:onClick="nextTrack"
             app:srcCompat="@android:drawable/ic_media_next" />
     </LinearLayout>
 
@@ -100,19 +100,19 @@
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <ImageButton
-        android:id="@+id/ib_go_to_song_list"
+        android:id="@+id/ib_go_to_track_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="44dp"
         android:contentDescription="@string/app_name"
-        android:onClick="goToSongList"
+        android:onClick="goToTrackList"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@android:drawable/ic_menu_sort_by_size" />
 
     <ImageButton
-        android:id="@+id/ib_scan_songs"
+        android:id="@+id/ib_scan_tracks"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"

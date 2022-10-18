@@ -1,8 +1,5 @@
 package com.andrey.guryanov.harmonica;
 
-import android.os.Environment;
-
-import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,62 +9,62 @@ public class PlayList implements Serializable {
     private static final long serialVersionUID = 8906945642254162505L;
     private String name;
 
-    private Song currentSong;
+    private Track currentTrack;
     private int duration;
     private int elapsed;
     private boolean isPlaying;
     private boolean isStopped;
 
-    private final List<Song> songs = new ArrayList<>();
-    private int countSongs;
-    private long lastUsedID;                                                                        //нужен для того, чтобы каждой добавляемой песне присваивать уникальный ID, который
-                                                                                                    //никогда не использовался и уже никому не присвоится
-//    private int currentSongID;
-    private int prevSongNumber;
-    private int currentSongNumber;
-    private int nextSongNumber;
-    private int songsPlayedCounter;
+    private final List<Track> tracks = new ArrayList<>();
+    private int countTracks;
+    private long lastUsedID;                                                                        //нужен для того, чтобы каждой добавляемой песне присваивать уникальный ID, который --
+                                                                                                    //-- никогда не использовался и уже никому не присвоится
+//    private int currentTrackID;
+    private int prevTrackNumber;
+    private int currentTrackNumber;
+    private int nextTrackNumber;
+    private int tracksPlayedCounter;
 
-    private List<Integer> songQueue;
+    private List<Integer> trackQueue;
 
     public PlayList(String name) {
         this.name = name;
 
         initVariable();
-        //addTestSongs();
+        //addTestTracks();
     }
 
     private void initVariable() {
-        countSongs = 0;
+        countTracks = 0;
         lastUsedID = 0;
-        currentSong = new Song("", "", 0);                                            //пустая песня, нужна для корректной работы с плейлистом
-        songQueue = new ArrayList<>();                                                              //очередь воспроизведения песен. Через неё
+        currentTrack = new Track("", "", 0);                                            //пустая песня, нужна для корректной работы с плейлистом
+        trackQueue = new ArrayList<>();                                                              //очередь воспроизведения песен. Через неё
     }
 
 
-//    public void addSongOLD(Song song) {
-//        countSongs++;
-//        songs.add(song);
+//    public void addTrackOLD(Track track) {
+//        countTracks++;
+//        tracks.add(song);
 //
 //    }
 
-    public void addSong(String name, String path) {
-        countSongs++;
-        songs.add(new Song(name, path, generateNewId()));
-        songQueue.add(countSongs);
+    public void addTrack(String name, String path) {
+        countTracks++;
+        tracks.add(new Track(name, path, generateNewId()));
+        trackQueue.add(countTracks);
 
     }
 
-    public int getCountSongs() {
-        return countSongs;
+    public int getCountTracks() {
+        return countTracks;
     }
 
-    public int getSongsPlayedCount() {
-        return songsPlayedCounter;
+    public int getTracksPlayedCount() {
+        return tracksPlayedCounter;
     }
 
-    public void setSongsPlayedCount(int count) {
-        songsPlayedCounter = count;
+    public void setTracksPlayedCount(int count) {
+        tracksPlayedCounter = count;
     }
 
     public long generateNewId() {
@@ -83,28 +80,28 @@ public class PlayList implements Serializable {
         return name;
     }
 
-    public List<Song> getSongs() {
-        return songs;
+    public List<Track> getTracks() {
+        return tracks;
     }
 
-    public Song getCurrentSong() {
-        return currentSong;
+    public Track getCurrentTrack() {
+        return currentTrack;
     }
 
 //    public int getCurrentSongID() {
 //        return currentSongID;
 //    }
 
-    public int getCurrentSongNumber() {
-        return currentSongNumber;
+    public int getCurrentTrackNumber() {
+        return currentTrackNumber;
     }
 
-    public void setCurrentSong(Song song) {
-        currentSong = song;
+    public void setCurrentTrack(Track track) {
+        currentTrack = track;
     }
 
-    public void setFirstSongAsCurrent() {
-        currentSong = songs.get(0);
+    public void setFirstTrackAsCurrent() {
+        currentTrack = tracks.get(0);
     }
 
     public void saveState() {
@@ -115,33 +112,33 @@ public class PlayList implements Serializable {
 
     }
 
-    public void deleteSong() {
-        countSongs--;
+    public void deleteTrack() {
+        countTracks--;
 
     }
 
-    public void setNextSong() {
-        songsPlayedCounter++;
+    public void setNextTrack() {
+        tracksPlayedCounter++;
         //currentSongNumber = songQueue.get(songsPlayedCounter);
-        currentSong = songs.get(songQueue.get(songsPlayedCounter) - 1);
+        currentTrack = tracks.get(trackQueue.get(tracksPlayedCounter) - 1);
     }
 
-    public void setPrevSong() {
-        songsPlayedCounter--;
-        currentSong = songs.get(songQueue.get(songsPlayedCounter) - 1);
+    public void setPrevTrack() {
+        tracksPlayedCounter--;
+        currentTrack = tracks.get(trackQueue.get(tracksPlayedCounter) - 1);
     }
 
     public boolean itsPossible(int intent) {
-        //return songsPlayedCounter != 0 && songsPlayedCounter != (countSongs - 1);
-        if (intent == -1) return songsPlayedCounter != 0;
-        else return countSongs > 1 && songsPlayedCounter != (countSongs - 1);
+        //return tracksPlayedCounter != 0 && tracksPlayedCounter != (countTracks - 1);
+        if (intent == -1) return tracksPlayedCounter != 0;
+        else return countTracks > 1 && tracksPlayedCounter != (countTracks - 1);
     }
 
 
-    public void addTestSongs() {
+    public void addTestTrack() {
         int count = 100;    //необходимое количество тестовых песен
         for (int i = 0; i < count; i++) {
-            addSong("Песня № " + (i + 1),"/test");
+            addTrack("Песня № " + (i + 1),"/test");
         }
     }
 

@@ -75,19 +75,19 @@ public class FileListControl extends FileList {
 
     /** ОПТИМИЗАЦИЯ
      -вынести все чекбоксы в отдельный массив для более удобного управления, а также оптимизации программы в плане работы с оными
-     -плейлист формировать не как объект с объектами Song, а как текстовый файл.
+     -плейлист формировать не как объект с объектами Track, а как текстовый файл.
 
      -
      -
      **/
+
+
     private LayoutInflater inflater;
     private Context parent;
     private RecyclerView fileList;
-//    private View parentView;
-    private TextView folderName, folderPath, console;
+    private TextView folderName, folderPath;
     private ImageButton goBack;
 
-    //private final Context parentCon = getActivityContext();//test
 
     //private FileListAdapter currentAdapter;
 //    private List<Item> homeFolders;
@@ -98,17 +98,13 @@ public class FileListControl extends FileList {
     private PlayList playList;
 //    private String[] current;
     private List<String[]> navigation;
-    private int count;  //счетчик шагов, которые были сделаны от начальных папок (домашних), до
-    // конечного пути, до которого дойдет пользователь. Нужен для того, чтобы не получать каждый раз
-    // задние пути, сканируя папки на телефоне, когда пользователь решит вернуться к предыдущей
-    // папке. Все пути, которые пройдет пользователь в одном направлении, сохраняются в "Список
-    // списков" (listFolder), а счетчик служит индексом, чтобы нужные пути из "Списка списков" можно
-    // было быстренько получить.
+    private int count;                                                                              //счетчик шагов, которые были сделаны от начальных папок (домашних), до
+                                                                                                    //-- конечного пути, до которого дойдет пользователь. Нужен для того, чтобы не получать
+                                                                                                    //-- каждый раз задние пути, сканируя папки на телефоне, когда пользователь решит
+                                                                                                    //-- вернуться к предыдущей папке. Все пути, которые пройдет пользователь в одном
+                                                                                                    //-- направлении, сохраняются в "Список списков" (listFolder), а счетчик служит
+                                                                                                    //-- индексом, чтобы нужные пути из "Списка списков" можно было быстренько получить.
 
-
-    public FileListControl() {
-
-    }
 
     public FileListControl(Context parent, RecyclerView fileList, List<Object> args) {
         this.parent = parent;
@@ -117,19 +113,13 @@ public class FileListControl extends FileList {
 
         this.folderName = (TextView) args.get(0);
         this.folderPath = (TextView) args.get(1);
-
-        this.console = (TextView) args.get(2);
-        this.goBack = (ImageButton) args.get(3);
+        this.goBack = (ImageButton) args.get(2);
 
         this.playList = App.getPlayer().getCurrentPlayList();
-//        this.parentView = view;
 
     }
 
-//    public void refreshFileList(RecyclerView fileList, List<Item> paths) {
-//        FileListAdapter adapter = new FileListAdapter(context, paths);
-//        fileList.setAdapter(adapter);
-//    }
+
 
     public void saveHomeFolders() {
 
@@ -180,39 +170,7 @@ public class FileListControl extends FileList {
         return listFolder.get(0);
     }
 
-//    public static void nextNavigation(String path) {
-//        navigation.add(path);
-//    }
 
-//    public static void prevNavigation() {
-//        int lastIndex = navigation.size() - 1;
-//        navigation.remove(lastIndex);
-//    }
-
-//    public void replaceText
-
-
-//    public void goToNext(String path) {
-//        count++;
-//
-//    }
-
-
-
-//    public static String getCurrentPath() {
-//        int lastIndex = navigation.size() - 1;
-//        return navigation.get(lastIndex);
-//    }
-
-//    public void initRecyclerView() {
-//        fileList = view.findViewById(R.id.rv_file_list);
-//        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(parent);
-//        fileList.setLayoutManager(layoutManager);
-//        FileListAdapter adapter = new FileListAdapter(parent, view, fileList, FileList.getFirstPaths());
-//        fileList.setAdapter(adapter);
-//
-//        currentAdapter = adapter;
-//    }
 
     public void setText() {
 
@@ -236,19 +194,8 @@ public class FileListControl extends FileList {
         navigation.add(new String[] {currentFolder, currentPath});
     }
 
-//    public void testConsole(Item item) {
-//        StringBuilder builder = new StringBuilder();
-//        String n = "\n";
-//        builder.append("Имя: " + item.getName() + n)
-//                .append("Путь: " + item.getPath() + n)
-//                .append("Это файл? " + item.isFile() + n)
-//                .append("Расширение: " + item.getExtension());
-//        console.setText(builder.toString());
-//    }
-
-    public void goToNext(int position) {
+    public void openSelectedFolder(int position) {
         Item item = folderItems.get(position);
-        //testConsole(item);  //вывод свойств открываемой папки в тестовую консоль
         currentPath = item.getPath();
         currentFolder = item.getName();
         setText();
@@ -262,7 +209,7 @@ public class FileListControl extends FileList {
         startAdapter(folderItems);
     }
 
-    public void goToBack() {
+    public void returnToPrevFolder() {
         listFolder.remove(count);
         navigation.remove(count);
         count--;
@@ -285,18 +232,7 @@ public class FileListControl extends FileList {
 //        ItemListFragment.setCurrentAdapter(adapter);
     }
 
-//    public void clickOnViewHolder(int position) {
-//        if (folderItems.get(position).getIsFile()) {
-//            Item item = folderItems.get(position);
-//            currentAdapter.ViewHolder checkBox.setChecked(item.replaceFlag());
-//        }
-//        else {
-//            for(Item item : folderItems) {
-//                item.setFlag(false);
-//            }
-//            goToNext(position);
-//        }
-//    }
+
 
     public void checkAll() {
         int tempCount = 0;
@@ -426,7 +362,7 @@ public class FileListControl extends FileList {
     public void findFilesInFolder(Item item) {
         List<Item> tempList = new ArrayList<>(getNewItemsFrom(item.getPath())); //можно не создавать список, а сразу его использовать
         for (Item tempItem : tempList) {
-            addSongs(tempItem);
+            addTracks(tempItem);
         }
     }
 
@@ -434,14 +370,14 @@ public class FileListControl extends FileList {
 
         for (Item item : folderItems) {
             if (item.getFlag()) {
-                addSongs(item);
+                addTracks(item);
             }
         }
 
         //super.onBackPressed();
 
 
-        if (playList.getCountSongs() == 0) {
+        if (playList.getCountTracks() == 0) {
             Toast toast = Toast.makeText(inflater.getContext(), "Музыка не найдена!", Toast.LENGTH_SHORT);
             toast.show();
         }
@@ -454,9 +390,9 @@ public class FileListControl extends FileList {
 
     }
 
-    public void addSongs(Item item) {
+    public void addTracks(Item item) {
 
-        if (item.isFile()) playList.addSong(item.getName(), item.getPath());
+        if (item.isFile()) playList.addTrack(item.getName(), item.getPath());
         else {
             findFilesInFolder(item);
 
@@ -467,6 +403,21 @@ public class FileListControl extends FileList {
 
     }
 
+
+
+}
+
+
+    /**
+     * СТАРЫЙ КОД (ЗАКОММЕНТИРОВАННЫЙ)
+     **/
+
+
+//    public void refreshFileList(RecyclerView fileList, List<Item> paths) {
+//        FileListAdapter adapter = new FileListAdapter(context, paths);
+//        fileList.setAdapter(adapter);
+//    }
+
 //    public File[] convertToFileArray(String[] paths) {
 //        File[] fileArray = new File[paths.length];
 //        for (int i = 0; i < paths.length; i++) {
@@ -475,5 +426,47 @@ public class FileListControl extends FileList {
 //        return fileArray;
 //    }
 
+//    public void clickOnViewHolder(int position) {
+//        if (folderItems.get(position).getIsFile()) {
+//            Item item = folderItems.get(position);
+//            currentAdapter.ViewHolder checkBox.setChecked(item.replaceFlag());
+//        }
+//        else {
+//            for(Item item : folderItems) {
+//                item.setFlag(false);
+//            }
+//            goToNext(position);
+//        }
+//    }
 
-}
+//    public static void nextNavigation(String path) {
+//        navigation.add(path);
+//    }
+
+//    public static void prevNavigation() {
+//        int lastIndex = navigation.size() - 1;
+//        navigation.remove(lastIndex);
+//    }
+
+
+
+//    public void goToNext(String path) {
+//        count++;
+//
+//    }
+
+//    public static String getCurrentPath() {
+//        int lastIndex = navigation.size() - 1;
+//        return navigation.get(lastIndex);
+//    }
+
+//    public void initRecyclerView() {
+//        fileList = view.findViewById(R.id.rv_file_list);
+//        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(parent);
+//        fileList.setLayoutManager(layoutManager);
+//        FileListAdapter adapter = new FileListAdapter(parent, view, fileList, FileList.getFirstPaths());
+//        fileList.setAdapter(adapter);
+//
+//        currentAdapter = adapter;
+//    }
+

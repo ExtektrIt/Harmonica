@@ -1,39 +1,19 @@
 package com.andrey.guryanov.harmonica.utils;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.util.Log;
-import android.view.View;
 
-import com.andrey.guryanov.harmonica.PlayList;
 import com.andrey.guryanov.harmonica.Player;
-import com.andrey.guryanov.harmonica.Song;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 public class App extends Application {
 
     private static App[] app;
     private static Context[] context;
-    private Player player;
     private boolean initPlayer;
-
-    //private ArrayList<Object> viewArray;
-    //private static ArrayList<App> app1;
-    //private static Activity[] currentActivity = new Activity[1];
-    //private static HashMap<String, App> app;
-    //public static boolean initMain = false;
+    private Player player;
 
     @Override
     public void onCreate() {
@@ -43,18 +23,20 @@ public class App extends Application {
     }
 
 
-/** СЛУЖЕБНЫЕ МЕТОДЫ **/
+    /**
+     * СЛУЖЕБНЫЕ МЕТОДЫ
+     **/
 
 
     private void init() {
-        context = new Context[] {getApplicationContext()};
-        app = new App[] {this};
+        context = new Context[]{getApplicationContext()};
+        app = new App[]{this};
 
-        Log.e("App","App инициализировался!");
+        Log.e("App", "App инициализировался!");
     }
 
-    private Player player() {
-        if ( ! initPlayer) {
+    private Player returnPlayer() {
+        if (!initPlayer) {
             createPlayer();
             initPlayer = true;
         }
@@ -67,7 +49,9 @@ public class App extends Application {
     }
 
 
-/** СТАТИЧЕСКИЕ ГЕТТЕРЫ **/
+    /**
+     * СТАТИЧЕСКИЕ ГЕТТЕРЫ
+     **/
 
 
     public static App getApp() {
@@ -78,11 +62,11 @@ public class App extends Application {
         return context[0];
     }
 
-    public static String getAppDir () {
+    public static String getAppDir() {
         return context[0].getApplicationInfo().dataDir + "/files";
     }
 
-    public static String getPlayListsDir () {
+    public static String getPlayListsDir() {
         return getAppDir() + "/PlayLists";
     }
 
@@ -95,15 +79,20 @@ public class App extends Application {
     }
 
     public static Player getPlayer() {
-        return getApp().player();
+        return getApp().returnPlayer();
     }
 
+}
 
-/**  **/
 
-    public static void initViewsToPlayer(ArrayList<Object> viewsList) {
-        getPlayer().initPlayer(viewsList);
-    }
+    /**
+     * СТАРЫЙ КОД (ЗАКОММЕНТИРОВАННЫЙ)
+     **/
+
+
+//    public static void initViewsToPlayer(ArrayList<Object> viewsList) {
+//        getPlayer().initPlayer(viewsList);
+//    }
 
 //    public boolean playerIsInit() {
 //        return initPlayer;
@@ -160,7 +149,7 @@ public class App extends Application {
 ////            }
 //            //player = (Player) ois.readObject();
 //
-//            player.getCurrentPlayList().setCurrentSong((Song) ois.readObject());
+//            player.getCurrentPlayList().setCurrentSong((Track) ois.readObject());
 //            player.getCurrentPlayList().setSongsPlayedCount(ois.readInt());
 //            player.setIsPlaying(ois.readBoolean());
 //            player.setIsStopped(ois.readBoolean());
@@ -236,4 +225,4 @@ public class App extends Application {
 //        }
 //    }
 
-}
+

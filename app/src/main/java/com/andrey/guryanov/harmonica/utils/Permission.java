@@ -14,7 +14,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-public class PermissionUtils {
+public class Permission {
     public static boolean hasPermissions(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
 //            return Environment.isExternalStorageLegacy();

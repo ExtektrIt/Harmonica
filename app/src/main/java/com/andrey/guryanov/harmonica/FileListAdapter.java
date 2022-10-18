@@ -25,7 +25,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.ViewHo
     private final List<Item> folderItems;
     private final LayoutInflater inflater;
 
-    private FileListControl controller;
+    private final FileListControl controller;
 
 //    private final Context parent;
 //    private final RecyclerView fileList;
@@ -118,7 +118,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.ViewHo
                         for(Item item : folderItems) {
                             item.setFlag(false);
                         }
-                        controller.goToNext(position);
+                        controller.openSelectedFolder(position);
                     }
 
 //                    Toast toast = Toast.makeText(parent, "Была нажата позиция " + position, Toast.LENGTH_SHORT);
