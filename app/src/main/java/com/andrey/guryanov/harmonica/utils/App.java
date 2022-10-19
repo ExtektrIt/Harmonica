@@ -8,18 +8,21 @@ import com.andrey.guryanov.harmonica.Player;
 
 import java.io.File;
 
-public class App extends Application {
-
-    private static App[] app;
-    private static Context[] context;
-    private boolean initPlayer;
-    private Player player;
+public class App extends Application {                                                              //Класс Апп. Объект этого класса создаётся только один раз. Его назначение - доступ
+                                                                                                    //--к Плееру из любой точки приложения через вызов статического метода
+    private static App[] app;                                                                       //статический массив, где хранится ссылка на этот объект. Массив нужен для того, чтобы
+                                                                                                    //--передавать нестатический объект этого класса в статическом методе
+    private static Context[] context;                                                               //статический массив с контекстом приложения. Нужен по тем же причинам, что и выше.
+    private boolean initPlayer;                                                                     //маркер, показывающий, создался ли уже объект класса Плеер. Нужен для того, чтобы
+                                                                                                    //--создавать объект Плеера только один раз
+    private Player player;                                                                          //Объект класса Плеер. Создаётся в приложении только один раз (синглтон)
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        init();
+        init();                                                                                     //инициализируем статические массивы, чтобы объекты в них можно было вызывать из любой
+                                                                                                    // --точки приложения
     }
 
 
@@ -29,19 +32,19 @@ public class App extends Application {
 
 
     private void init() {
-        context = new Context[]{getApplicationContext()};
-        app = new App[]{this};
+        context = new Context[]{getApplicationContext()};                                           //заносим в массив контекст приложения
+        app = new App[]{this};                                                                      //заносим в массив ссылку на этот объект (this App)
 
-        Log.e("App", "App инициализировался!");
+        Log.e("App", "App инициализировался!"); //тест
     }
 
-    private Player returnPlayer() {
-        if (!initPlayer) {
-            createPlayer();
-            initPlayer = true;
+    private Player returnPlayer() {                                                                 //возвращает объект Плеера
+        if (!initPlayer) {                                                                          //если Плеер ещё не создан
+            createPlayer();                                                                         //создаём объект Плеера
+            initPlayer = true;                                                                      //говорим маркеру, что Плеер создан
         }
         //Log.e("App","Player инициализировался!");
-        return player;
+        return player;                                                                              //возвращаем новосозданный или созданный ранее Плеер
     }
 
     private void createPlayer() {
@@ -70,12 +73,12 @@ public class App extends Application {
         return getAppDir() + "/PlayLists";
     }
 
-    public static String getPlayerDataPath() {
+    public static String getPlayerStatePath() {                                                      //возвращает путь в папке приложения к файлу, в котором сохраняется состояние плеера
         return getAppDir() + "/playerState.hps";
     }
 
-    public static boolean isFirstLaunchApp() {
-        return !new File(getPlayerDataPath()).exists();
+    public static boolean isFirstLaunchApp() {                                                      //метод проверяет, запускалось ли это приложение когда-нибудь, или это первый запуск
+        return !new File(getPlayerStatePath()).exists();
     }
 
     public static Player getPlayer() {

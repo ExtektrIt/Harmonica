@@ -25,8 +25,6 @@ public class FileList extends AppCompatActivity {
 //    private String playListName;
 //    private String name, path;
 //    private Context thisContext;//тест
-
-
     private FileListControl controller;
 
 
