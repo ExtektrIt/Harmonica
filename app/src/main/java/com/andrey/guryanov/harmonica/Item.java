@@ -10,6 +10,7 @@ public class Item {
     private boolean isFile = false;
     private String extension;
 
+
     public Item(boolean isFile, String path, String extension) {
         this.path = path;
         this.name = new File(path).getName();
@@ -26,6 +27,9 @@ public class Item {
         this.path = path;
         this.name = new File(path).getName();
     }
+
+
+    /** ГЕТТЕРЫ */
 
 
     public String getName() {
@@ -49,14 +53,8 @@ public class Item {
     }
 
 
+    /** СЕТТЕРЫ */
 
-//    public void setIsFile(boolean isFile) {
-//        this.isFile = isFile;
-//    }
-
-//    public void setExtension(String extension) {
-//        this.extension = extension;
-//    }
 
     public boolean replaceFlag() {
         flag = !flag;
@@ -67,5 +65,16 @@ public class Item {
         this.flag = flag;
     }
 
-
 }
+
+
+    /** СТАРЫЙ КОД (ЗАКОММЕНТИРОВАННЫЙ) */
+
+
+//    public void setIsFile(boolean isFile) {
+//        this.isFile = isFile;
+//    }
+
+//    public void setExtension(String extension) {
+//        this.extension = extension;
+//    }

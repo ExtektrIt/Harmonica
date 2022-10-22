@@ -30,7 +30,8 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
     //private ArrayList<View> viewArgs;
     private ImageButton playPause;
     private SeekBar seekBar;
-    private int loadCurrentPos;
+    private int loadedElapseTime;                                                                   //используется только при загрузке состояния для возобновления воспроизведения трека
+                                                                                                    //-- с того места, откуда оно приостановилось
     private TextView title, artist, elapsed, duration, remainder;
     private TextView trackInfo;
     private MyTimer timer;
@@ -40,21 +41,17 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
         initPlayLists();                                                                            //костыль. инициализируем плейлисты //в будущем буду загружать последний плейлист
 
         mediaPlayer = new MediaPlayer();
-        timer = new MyTimer(0);
-
+        timer = new MyTimer(0);                                                                     //инициализируем пустой таймер, чтобы не возникало NPE
         isStopped = true;
         isPlaying = false;
-
         stateIsLoaded = false;
     }
 
 
-    /**
-     * ИНИЦИАЛИЗАЦИЯ ПЛЕЕРА
-     **/
+    /** ИНИЦИАЛИЗАЦИЯ ПЛЕЕРА */
 
 
-    public void initPlayer(ArrayList<Object> views) {
+    public void initPlayer(ArrayList<Object> views) {                                               //метод инициализирует вьюшки Мэйна для управления ими
         title = (TextView) views.get(0);
         artist = (TextView) views.get(1);
         elapsed = (TextView) views.get(2);
@@ -69,17 +66,17 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
         if ( ! stateIsLoaded) loader();                                                             //если плеер еще не загрузил своё состояние, то пусть загрузит. Иначе ничего не делать.
     }                                                                                               //-- Нужно для того, чтобы при переворачивании экрана плеер не загружал состояние снова
 
-    public void loader() {
-        if (!App.isFirstLaunchApp()) {                                                              //если это первый запуск приложения после установки
+    private void loader() {                                                                         //загрузчик состояния плеера. Метод проверяет, загружено ли состояние
+        if ( ! App.isFirstLaunchApp()) {                                                            //если это НЕ первый запуск приложения после установки
             loadPlayerState();                                                                      //загружаем состояние Плеера из файла
             if (!isStopped) {                                                                       //если должен играть либо на паузе
                 preparePlayer();                                                                    //подготавливаем плеер
                 if (isPlaying) {                                                                    //если должен играть
-                    mediaPlayer.seekTo(loadCurrentPos);                                             //мотаем трек до того места, откуда плеер прервался при закрытии
+                    mediaPlayer.seekTo(loadedElapseTime);                                           //мотаем трек до того места, откуда плеер прервался при закрытии
                     resume();                                                                       //возобновляем воспроизведение
                 } else {
-                    mediaPlayer.seekTo(loadCurrentPos);                                             //иначе просто мотаем трек до момента остановки
-                    setSeekBarProgress(loadCurrentPos);                                             //и ставим Сикбар в нужное положение
+                    mediaPlayer.seekTo(loadedElapseTime);                                           //иначе просто мотаем трек до момента остановки
+                    setSeekBarProgress(loadedElapseTime);                                           //и ставим Сикбар в нужное положение
                 }
             }
         }
@@ -90,10 +87,7 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
     }
 
 
-    /**
-     * ТОЧКИ ВЗАИМОДЕЙСТВИЯ (ИНТЕРФЕЙС ПОЛЬЗОВАТЕЛЯ)
-     **/
-//в будущем сюда вынесу обертки для методов прев, некст и стоп
+    /** ТОЧКИ ВЗАИМОДЕЙСТВИЯ (ИНТЕРФЕЙС ПОЛЬЗОВАТЕЛЯ) */                                            //в будущем сюда вынесу обертки для методов прев, некст и стоп
 
 
     public void playFromMain() {                                                                    //Исключительно для Мэйна! Тут всевозможные проверки перед воспроизведением
@@ -110,32 +104,27 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
         if (isPlaying) pause();
         else if (!isStopped) resume();
         else {
-            //isPlaying = true;
-            //isStopped = false;
             preparePlayer();
             play();
         }
     }
 
     public void playFromTrackList() {
-        if (isPlaying) timer.cancel();                                                              //выключаем счетчик
+        if (isPlaying) timer.cancel();                                                              //если идёт воспроизведение, выключаем счетчик
         mediaPlayer.stop();
         preparePlayer();
         play();
     }
 
 
-    /**
-     * УПРАВЛЕНИЕ МУЗЫКОЙ
-     **/
-//в будущем все методы сделаю приватными
+    /** УПРАВЛЕНИЕ МУЗЫКОЙ */
 
 
-    public void preparePlayer() {
+    private void preparePlayer() {                                                                  //метод подготавливает проигрыватель
         mediaPlayer = MediaPlayer.create(App.getAppContext(), getCurrentTrack().getUri());          //подготавливает трек перед воспроизведением (ищет его по пути и инициализирует)
     }
 
-    public void play() {
+    private void play() {
         if (isStopped) seekBar.setEnabled(true);                                                    //если плеер был остановлен, то включаем Сикбар для пользователя
         isPlaying = true;
         isStopped = false;
@@ -149,7 +138,7 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
         changePlayButton();                                                                         //меняем иконку кнопки Плей (будет отображаться иконка паузы)
     }
 
-    public void pause() {
+    private void pause() {
         isPlaying = false;
         timer.cancel();                                                                             //выключаем счетчик
 
@@ -158,11 +147,11 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
         changePlayButton();                                                                         //меняем кнопку
     }
 
-    public void resume() {
+    private void resume() {
         isPlaying = true;
         mediaPlayer.start();                                                                        //возобновляем воспроизведение (метод Старт и запускает и продолжает)
 
-        timer = new MyTimer(mediaPlayer.getDuration()                                    //создаем новый счетчик и передаём туда оставшееся время (длительность - пройденное)
+        timer = new MyTimer(mediaPlayer.getDuration()                                               //создаем новый счетчик и передаём туда оставшееся время (длительность - пройденное)
                 - mediaPlayer.getCurrentPosition());
         timer.start();                                                                              //запускаем счетчик
         changePlayButton();                                                                         //меняем кнопку
@@ -183,59 +172,23 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
     }
 
     public void next() {
-        if (currentPlayList.itsPossible(1)) {                                                 //если переключение возможно (есть песни далее)
-            currentPlayList.setNextTrack();                                                         //метод задаёт следующий трек как текущий
-            changeTrack();                                                                          //тут происходит процесс для переключения песни
-//            timer.cancel();
-//
-//            mediaPlayer.stop();
-//            preparePlayer();
-//
-//            if (isPlaying) {
-//                play();
-//            }
-//            else {
-//                isStopped = true;                                                                   //нужно для того, чтобы при нажатии на плей, выполнялся метод Плей, а не Резьюм
-//                showSongInfo();
-//            }
-
-//            if (isPlaying) {
-//                timer.cancel();//
-//                mediaPlayer.stop();
-//                preparePlayer();
-//                play();
-//            }
-//            else {
-//                stop();
-//                preparePlayer();
-//                //mediaPlayer = MediaPlayer.create(App.getAppContext(), getCurrentSong().getUri());   //нужно для того, чтобы получить данные новой песни
-//            }
-//            //showSongInfo();
+        if (currentPlayList.itsPossible((byte) 1)) {                                                //если переключение возможно (ещё есть треки далее в очереди)
+            currentPlayList.setNextTrack();                                                         //задаём следующий трек из очереди как текущий
+            changeTrack();                                                                          //тут происходит процесс переключения трека
         } else if (!isStopped) stop();                                                              //иначе, если невозможно переключить и плеер не на стопе, то остановить воспроизведение
     }
 
     public void prev() {                                                                            //всё то же самое, что и для метода Некст
-        if (currentPlayList.itsPossible(-1)) {
+        if (currentPlayList.itsPossible((byte) -1)) {                                               //если переключение возможно (есть треки позади в очереди)
             currentPlayList.setPrevTrack();
             changeTrack();
-//            if (isPlaying) {
-//                mediaPlayer.stop();
-//                preparePlayer();
-//                play();
-//            }
-//            else {
-//                stop();
-//                preparePlayer();
-//                //mediaPlayer = MediaPlayer.create(App.getAppContext(), getCurrentSong().getUri());
-//            }
-//            //showSongInfo();
         } else if (!isStopped) stop();
     }
 
-    public void changeTrack() {
-        timer.cancel();                                                                             //останавливает счетчик
-        mediaPlayer.stop();                                                                         //останавливает проигрыватель
-        preparePlayer();                                                                            //подготавливает проигрыватель
+    private void changeTrack() {                                                                    //метод переключает трек
+        timer.cancel();                                                                             //останавливаем счетчик
+        mediaPlayer.stop();                                                                         //останавливаем проигрыватель
+        preparePlayer();                                                                            //подготавливаем проигрыватель
         if (isPlaying) {                                                                            //если перед переключением проигрыватель играл, то сразу запускаем проигрывание
             play();
         } else {                                                                                    //иначе, если пауза
@@ -247,13 +200,15 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
         }
     }
 
+    public void rewindTrackTo10Sec(byte direction) {                                                 //метод перематывает трек на 10 секунд вперёд или назад, в зависимости от аргумента
 
-    /**
-     * ЗАГРУЗКА И СОХРАНЕНИЕ СОСТОЯНИЯ
-     **/
+    }
 
 
-    public void loadPlayerState() {
+    /** ЗАГРУЗКА И СОХРАНЕНИЕ СОСТОЯНИЯ */
+
+
+    public void loadPlayerState() {                                                                 //метод загружает состояние плеера, сохранённое в память при выходе из приложения
         try {
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(
                     App.getPlayerStatePath()));
@@ -262,17 +217,16 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
             currentPlayList.setTracksPlayedCount(ois.readInt());
             isPlaying = ois.readBoolean();
             isStopped = ois.readBoolean();
-            loadCurrentPos = ois.readInt();
+            loadedElapseTime = ois.readInt();
 
             ois.close();
         } catch (Exception e) {
             e.printStackTrace();
             Log.e("main", "error: " + e.getMessage());
         }
-
     }
 
-    public void savePlayerState() {
+    public void savePlayerState() {                                                                 //метод сохраняет состояние плеера в память при выходе из приложения
         try {
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(
                     App.getPlayerStatePath()));
@@ -290,12 +244,10 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
     }
 
 
-    /**
-     * РАБОТА С ПЛЕЙЛИСТАМИ
-     **/
+    /** РАБОТА С ПЛЕЙЛИСТАМИ */
 
 
-    public void initPlayLists() {
+    private void initPlayLists() {                                                                  //метод инициализирует плейлист при создании объекта Плеер (при включении приложения)
         playLists = new ArrayList<>();                                                              //инициализируем массив плейлистов
         playListDir = new File(App.getPlayListsDir());                                              //инициализирует директорию плейлистов
         if (App.isFirstLaunchApp()) {                                                               //если приложение было запущено впервые с момента установки
@@ -306,7 +258,7 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
         }
     }
 
-    public void loadPlayLists() {
+    private void loadPlayLists() {                                                                  //метод загружает плейлист из памяти устройства
         try {
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(
                     playListDir.getPath() + "/playlists.hpl"));
@@ -322,7 +274,7 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
         }
     }
 
-    public void savePlayLists() {                                                                   //в будущем надо сохранять и загружать каждый плейлист отдельно
+    public void savePlayLists() {                                                                   //метод сохраняет плейлист в память устройства
         try {
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(
                     playListDir.getPath() + "/playlists.hpl"));
@@ -338,7 +290,7 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
         }
     }
 
-    public void createPlayList(String name) {
+    public void createPlayList(String name) {                                                       //метод создаёт новый плейлист
         PlayList newPlayList = new PlayList(name);
         playLists.add(newPlayList);                                                                 //костыль, в будущем этого списка не будет
         currentPlayList = newPlayList;                                                              //временно задаем новй плейлист как текущий, в будущем этого не будет
@@ -347,11 +299,9 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
 //        }
         //savePlaylist(newPlayList, name);
         savePlayLists();
-
-
     }
 
-    public void createDefaultPlayList() {
+    private void createDefaultPlayList() {                                                          //метод создаёт первичный плейлист (при первом запуске приложения после установки)
 //        if (!playListDir.mkdir()) {                                                                 //если папка с плейлистами по каким-то причинам не создалась
 //            Toast toast = Toast.makeText(this,"Ошибка при создании папки для плейлистов.",
 //            Toast.LENGTH_SHORT);  //ЗДЕСЬ НУЖЕН КОНТЕКСТ
@@ -360,20 +310,17 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
 //        }
         playListDir.mkdir();                                                                        //создаем директорию с плейлистами в папке приложения
         //String name = "DEFAULT";
-        createPlayList("DEFAULT");                                                            //демонстративно обзываем его дефолтным
-
+        createPlayList("DEFAULT");                                                                  //демонстративно обзываем его дефолтным
     }
 
-    public void addPlayList() {
-
-    }
-
-    public void refreshPlayList() {
-
+    public void changePlayList() {
+        //записываем состояние плеера в текущий плейлист (трек, суррентПлейКаунт, элапседТайм, //исСтоппед-фолс)
+        //сохраняем текущий плейлист в памяти устройства
+        //переключаем плейлист (загружаем нужный и ставим как текущий)
     }
 
     public void deletePlayList() {
-
+        //удаляем нужный плейлист из памяти устройства
     }
 
 //    public void savePlaylist(PlayList playList, String name) {
@@ -395,9 +342,7 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
 //        return ! playListDir.exists();
 //    }
 
-    /**
-     * ГЕТТЕРЫ
-     **/
+    /** ГЕТТЕРЫ */
 
 
     public PlayList getCurrentPlayList() {
@@ -421,9 +366,7 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
     }
 
 
-    /**
-     * СЕТТЕРЫ
-     **/
+    /** СЕТТЕРЫ */
 
 
     public void changeCurrentPlayList(PlayList pl) {
@@ -439,9 +382,7 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
     }
 
 
-    /**
-     * СЛУЖЕБНЫЕ МЕТОДЫ
-     **/
+    /** ПУБЛИЧНЫЕ СЛУЖЕБНЫЕ МЕТОДЫ */
 
 
     public void showTrackInfo() {                                                                   //метод отображает данные трека (название, длительность и тд) на экране Мейна
@@ -453,13 +394,17 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
         //duration.setText(timeFormatter(mediaPlayer.getDuration()));
     }
 
+
+    /** СЛУЖЕБНЫЕ МЕТОДЫ */
+
+
     public void changePlayButton() {                                                                //метод меняет иконку кнопки Плей в зависимости от состояния проигрывателя
         if (isPlaying) playPause.setImageResource(android.R.drawable.ic_media_pause);
         else playPause.setImageResource(android.R.drawable.ic_media_play);
     }
 
     @SuppressLint("DefaultLocale")
-    public String timeFormatter(int totalSec) {                                                     //метод преображает милисекунды в привычный для человека формат (например, 3:08)
+    private String timeFormatter(int totalSec) {                                                     //метод преображает милисекунды в привычный для человека формат (например, 3:08)
         int min = totalSec / 60;
         int sec = totalSec % 60;
         if (min < 60) {
@@ -470,43 +415,37 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
         }
     }
 
-    public void showDuration() {                                                                    //метод показывает длительность текущего трека
+    private void showDuration() {                                                                   //метод показывает длительность текущего трека
         int secs = mediaPlayer.getDuration() / 1000;
         duration.setText(timeFormatter(secs));
     }
 
-    public void setElapsedTime() {                                                                  //метод показывает/обновляет пройденное время текущего трека
+    private void setElapsedTime() {                                                                  //метод показывает/обновляет пройденное время текущего трека
         int secs = mediaPlayer.getCurrentPosition() / 1000;
         elapsed.setText(timeFormatter(secs));
     }
 
-    public void setSeekBarProgress(int position) {                                                  //метод передвигает ползунок Сикбара относительно проигранного времени текущего трека
+    private void setSeekBarProgress(int position) {                                                  //метод передвигает ползунок Сикбара относительно проигранного времени текущего трека
         long progress = position * 1000L / mediaPlayer.getDuration();
         seekBar.setProgress((int) progress);
     }
 
-    public void changeElapsedTime(int seekPos) {                                                    //метод перематывает трек относительно позиции Сикбара
+    private void changeElapsedTime(int seekPos) {                                                    //метод перематывает трек относительно позиции Сикбара
         int secs = mediaPlayer.getDuration() / 1000 * seekPos / 1000;
         elapsed.setText(timeFormatter(secs));
     }
 
-    public void resetRemainder() {                                                                  //метод сбрасывает оставшееся время до стандартного значения (неопределённость)
+    private void resetRemainder() {                                                                  //метод сбрасывает оставшееся время до стандартного значения (неопределённость)
         remainder.setText("--:--");
     }
 
-    public void rewindTrackTo(int position) {                                                       //метод перематывает трек на 10 секунд
-
-    }
-
-    public void resetElapsedTime() {                                                                //сбрасывает значения пройденного и оставшегося времени до нулей
+    private void resetElapsedTime() {                                                                //сбрасывает значения пройденного и оставшегося времени до нулей
         elapsed.setText(timeFormatter(0));
         seekBar.setProgress(0);
     }
 
 
-    /**
-     * УПРАВЛЕНИЕ SEEKBAR'ом
-     **/
+    /** УПРАВЛЕНИЕ SEEKBAR'ом */
 
 
     @Override
@@ -533,12 +472,10 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
     }
 
 
-    /**
-     * СЕКУНДНЫЙ СЧЁТЧИК ДЛЯ ОБНОВЛЕНИЯ ОТОБРАЖЕНИЯ ПРОШЕДШЕГО ВРЕМЕНИ И ПЕРЕКЛЮЧЕНИЯ ТРЕКОВ
-     **/
+    /** СЕКУНДНЫЙ СЧЁТЧИК ДЛЯ ОБНОВЛЕНИЯ ОТОБРАЖЕНИЯ ПРОШЕДШЕГО ВРЕМЕНИ И ПЕРЕКЛЮЧЕНИЯ ТРЕКОВ */
 
 
-    public class MyTimer extends CountDownTimer {                                                   //таймер обратного отсчета, приспособленный для счётчика:) Надо в будущем заменить
+    private class MyTimer extends CountDownTimer {                                                   //таймер обратного отсчета, приспособленный для счётчика:) Надо в будущем заменить
 
         public MyTimer(int millisInFuture) {                                                        //надо ему либо большое число передавать, либо останавливать счетчик при паузе
             super(millisInFuture, 1000L);
@@ -554,7 +491,7 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
             //long progress = mediaPlayer.getCurrentPosition() * 1000L / mediaPlayer.getDuration();
             //seekBar.setProgress((int) progress);
             setElapsedTime();                                                                       //меняем пройденное время
-            remainder.setText(timeFormatter((int) millisUntilFinished / 1000));              //меняем оставшееся время
+            remainder.setText(timeFormatter((int) millisUntilFinished / 1000));                     //меняем оставшееся время
             setSeekBarProgress(mediaPlayer.getCurrentPosition());                                   //меняем позицию Сикбара
         }
     }
@@ -562,58 +499,4 @@ public class Player implements SeekBar.OnSeekBarChangeListener {
 }
 
 
-    /**
-     * СТАРЫЙ КОД (ЗАКОММЕНТИРОВАННЫЙ)
-     **/
-
-
-    //    @Override
-//    public void onCompletion(MediaPlayer mp) {
-//        if (currentPlayList.itsPossible(1)) next(mp);
-//        else stop();
-//    }
-
-    //    public String getTrackInfo() {
-//        if (isPlaying) {
-//            MediaPlayer.TrackInfo[] arr = mediaPlayer.getTrackInfo();
-//            StringBuilder result = new StringBuilder()
-//                    .append(mediaPlayer.getAudioSessionId())
-//                    .append("\n");
-//            for (MediaPlayer.TrackInfo info : arr) {
-//                result.append(info.describeContents())
-//                        .append(info.getTrackType())
-//                        .append(info.getFormat().toString())
-//                        .append(info.getLanguage())
-//                        .append("\n");
-//            }
-//            return result.toString();
-//        }
-//        else return "";
-//    }
-
-    //    public void initViewsToPlayer(ArrayList<Object> views) {
-//        title = (TextView) views.get(0);
-//        artist = (TextView) views.get(1);
-//        elapsed = (TextView) views.get(2);
-//        duration = (TextView) views.get(3);
-//        seekBar = (SeekBar) views.get(4);
-//        playPause = (ImageButton) views.get(5);
-//        remainder = (TextView) views.get(6);
-//
-//        trackInfo = (TextView) views.get(7);
-//
-//        seekBar.setOnSeekBarChangeListener(this);
-//
-//        loader();
-//
-//        if (isStopped) seekBar.setEnabled(false);
-//
-//    }
-
-//        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-//            @Override
-//            public void onCompletion(MediaPlayer mp) {
-//                if (currentPlayList.itsPossible(1)) next();
-//                else stop();
-//            }
-//        });
+    /** СТАРЫЙ КОД (ЗАКОММЕНТИРОВАННЫЙ) */

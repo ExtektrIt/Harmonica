@@ -82,22 +82,22 @@ public class FileListControl extends FileList {
      **/
 
 
-    private LayoutInflater inflater;
-    private Context parent;
-    private RecyclerView fileList;
+    private final LayoutInflater inflater;
+    private final Context parent;
+    private final RecyclerView fileList;
     private TextView folderName, folderPath;
     private ImageButton goBack;
 
-
     //private FileListAdapter currentAdapter;
-//    private List<Item> homeFolders;
-//    private List<TextView> textArgs;
-    private List<Item> folderItems;
-    private List<List<Item>> listFolder;
-    private String currentPath, currentFolder;
-    private PlayList playList;
+    private List<Item> homeFolders;
+    private List<Item> folderItems;                                                                 //список элементов (имена и пути папок и файлов), находящихся в текущей директории
+    private List<List<Item>> listFolder;                                                            //список, содержащий в себе списки folderItems. Нужен для того, чтобы не обращаться к
+                                                                                                    //-- памяти всякий раз, когда возвращаемся в предыдущую папку
+    private String currentPath, currentFolder;                                                      //Строки, хранящие в себе путь и имя текущей папки
+    private PlayList playList;                                                                      //тут храним ссылку на объект плейлиста, в который будем добавлять треки
 //    private String[] current;
-    private List<String[]> navigation;
+    private List<String[]> navigation;                                                              //список, содержащий в себе массив из строк с путем и именем текущей папки. Нужен для
+                                                                                                    //-- хранения и отображения пути и имени текущей папки, когда возвращаемся на папку выше
     private int count;                                                                              //счетчик шагов, которые были сделаны от начальных папок (домашних), до
                                                                                                     //-- конечного пути, до которого дойдет пользователь. Нужен для того, чтобы не получать
                                                                                                     //-- каждый раз задние пути, сканируя папки на телефоне, когда пользователь решит
@@ -116,19 +116,105 @@ public class FileListControl extends FileList {
         this.goBack = (ImageButton) args.get(2);
 
         this.playList = App.getPlayer().getCurrentPlayList();
+    }
+
+
+    /** ТОЧКИ ВЗАИМОДЕЙСТВИЯ (ИНТЕРФЕЙС ПОЛЬЗОВАТЕЛЯ) */
+
+
+    public void showHomeFolders() {                                                                 //метод отображает список домашних папок
+        startAdapter(initHomeFolders());
+    }
+
+    public void openFolder(int position) {                                                          //метод выполняет переход по кликнутой папке
+        Item item = folderItems.get(position);
+        currentPath = item.getPath();
+        currentFolder = item.getName();
+        setText();
+        refreshNaviItem();
+        folderItems = new ArrayList<>(getNewItemsFrom(currentPath));
+//        folderItems = getNewItemsFrom(currentPath);
+        listFolder.add(folderItems);
+        count++;
+
+        /** $
+        // нужен отдельный метод для замены иконки */
+        goBack.setImageResource(android.R.drawable.ic_menu_revert);                                 //при переходе в след. папку каждый раз задаём кнопке Назад иконку реверса
+        startAdapter(folderItems);
+    }
+
+    public void returnToPrevFolder() {                                                              //метод для возвращения в предыдущую папку
+        listFolder.remove(count);
+        navigation.remove(count);
+        count--;
+        currentFolder = navigation.get(count)[0];
+        currentPath = navigation.get(count)[1];
+        setText();
+        refreshNaviItem();
+        folderItems = new ArrayList<>(listFolder.get(count));
+//        folderItems = listFolder.get(count);
+
+        if (count == 0) goBack.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);     //если возвращаемся в Домашнюю папку, кнопка Назад становится крестиком
+        startAdapter(folderItems);
+    }
+
+            /** $
+    // тут несколько циклов, можно это оптимизировать */
+    public void selectAll() {                                                                       //метод выбирает все файлы и папки в текущей папке
+        int tempCount = 0;
+        int size = folderItems.size();
+        for (Item item : folderItems) { //1 цикл (проверяющий)
+            if (item.getFlag()) tempCount++;
+        }
+        if (tempCount == 0 || tempCount == size) {
+            for (Item item : folderItems) {
+                item.replaceFlag();
+            }
+        }
+        else {
+            for (Item item : folderItems) {
+                item.setFlag(true);
+            }
+        }
+        startAdapter(folderItems);                                                                  // ! //костыль
+    }
+
+            /** ! */
+    public void fillPlayList() {                                                                    //метод добавляет в плейлист выбранные треки
+        for (Item item : folderItems) {
+            if (item.getFlag()) {
+                addTracks(item);
+            }
+        }
+            /** !
+        // тут кроется проблема, что если плейлист уже содержит треки, то всегда будет выводиться, что музыка успешно добавлена */
+        if (playList.getCountTracks() == 0) {                                                       //если ни одного трека не было добавлено, то выводим сообщение "Музыка не найдена!"
+            Toast toast = Toast.makeText(inflater.getContext(), "Музыка не найдена!"
+                    , Toast.LENGTH_SHORT);
+            toast.show();
+        }
+        else {                                                                                      //иначе, если хоть один трек был добавлен, то выводим сообщение об успехе операции
+            Toast toast = Toast.makeText(inflater.getContext(), "Музыка успешно добавлена!"
+                    , Toast.LENGTH_SHORT);
+            toast.show();
+                /** !
+            // тут надо добавить сравнение, чтобы не допустить одинаковых песен */
+            App.getPlayer().savePlayLists();                                                        //после добавления трека/ов сохраняем (перезаписываем) плейлист
+        }
 
     }
 
 
+    /** РАБОТА С ДОМАШНИМИ (НАЧАЛЬНЫМИ) ПАПКАМИ */
 
-    public void saveHomeFolders() {
 
-    }
-
-    public void createHomeFolders() { //Получаем первые пути
+            /** !
+    // метод функционирует лишь частично! */
+    private void createHomeFolders() {                                                              //метод создаёт домашние (начальные) папки, если это первый запуск приложения
         //Получаем путь до внутреннего накопителя
         String internal = Environment.getExternalStorageDirectory().getPath();
-//        String SDCard = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).toString();
+//        String SDCard = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC)
+//              .toString();
         //Получаем путь до системной папки
         String system = Environment.getRootDirectory().getPath();
         //Получаем путь до карты памяти
@@ -161,7 +247,46 @@ public class FileListControl extends FileList {
         navigation.add(new String[] {"Домашняя папка", " "});
     }
 
-    public List<Item> getHomeFolders() {
+    private void loadHomeFolders() {
+
+    }
+
+    private void saveHomeFolders() {
+
+    }
+
+
+    /** ПОИСК И ДОБАВЛЕНИЕ ТРЕКОВ В ПЛЕЙЛИСТ */
+
+
+    private void findFilesInFolder(Item item) {                                                     //метод принимает объект Итем (который является папкой), и ищет в его директории файлы
+        List<Item> tempList = new ArrayList<>(getNewItemsFrom(item.getPath()));                     //создаётся список, содержащий в себе файлы и папки, находящиеся в директории Итема
+        for (Item tempItem : tempList) {                                                            //цикл пробегает по списку и пытается добавить каждый Итем в плейлист
+            addTracks(tempItem);                                                                    //попытка преобразовать Итем в объект Трек и добавить его в плейлист
+        }
+    }
+
+    private void addTracks(Item item) {                                                             //метод добавляет в плейлист Трек на основе Итема, если Итем является муз. файлом
+        if (item.isFile()) playList.addTrack(item.getName(), item.getPath());                       //если Итем является файлом, то добавляем трек в плейлист на основе данных Итема
+        else {                                                                                      //иначе (если Итем является папкой)
+            findFilesInFolder(item);                                                                //вызываем метод поиска файлов и передаём туда директорию Итема (Итем же у нас папка)
+        }
+    }
+
+
+    /** ГЕТТЕРЫ */
+
+
+    public int getCount() {                                                                         //метод возвращает кол-во открытых папок по одному пути относительно домашней папки
+        return count;
+    }
+
+
+    /** СЛУЖЕБНЫЕ МЕТОДЫ */
+
+
+    private List<Item> initHomeFolders() {                                                          //метод инициализирует домашние папки. Если это первый запуск приложения, то метод
+                                                                                                    //-- создаёт домашние папки, если они уже были созданы ранее- загружает их
         count = 0;
         listFolder = new ArrayList<>();
 //        if (listFolder.size() != 0) return listFolder.get(0); //
@@ -170,181 +295,74 @@ public class FileListControl extends FileList {
         return listFolder.get(0);
     }
 
-
-
-    public void setText() {
-
-//        folderName = (TextView) findViewById(R.id.tv_folder_name);
-//        folderName.setText(currentFolder);
-//        folderPath = findViewById(R.id.tv_folder_path);
-//        getFolderName().setText(currentFolder);
-//        folderPath.setText(currentPath);
-//        setCurrentFolderName(currentFolder, currentPath);
-//        List<TextView> text = super.getText();
-//        TextView name = text.get(0);
-//        name.setText(currentFolder);
-        folderName.setText(currentFolder);  //возможно баг с отображением имени папки кроется здесь
+            /** !
+    // возможно баг с отображением имени папки кроется здесь */
+    private void setText() {                                                                        //метод меняет значение текущей папки и её пути, где находится пользователь
+        folderName.setText(currentFolder);
         folderPath.setText(currentPath);
-
     }
 
-    public void refreshNaviItem() {
-//        current[0] = currentFolder;
-//        current[1] = currentPath;
+            /** $
+    // можно хранить не массивы строк, а int переменные - указатели, в каком месте списка папок находится Итем с именем и путём текущей папки */
+    private void refreshNaviItem() {                                                                //метод сохраняет имя и путь текущей папки перед переходом в следующую папку
         navigation.add(new String[] {currentFolder, currentPath});
     }
 
-    public void openSelectedFolder(int position) {
-        Item item = folderItems.get(position);
-        currentPath = item.getPath();
-        currentFolder = item.getName();
-        setText();
-        refreshNaviItem();
-        folderItems = new ArrayList<>();
-        folderItems = getNewItemsFrom(currentPath);
-        listFolder.add(folderItems);
-        count++;
-
-        goBack.setImageResource(android.R.drawable.ic_menu_revert); //при переходе в след. папку каждый раз задаём кнопке Назад иконку реверса
-        startAdapter(folderItems);
-    }
-
-    public void returnToPrevFolder() {
-        listFolder.remove(count);
-        navigation.remove(count);
-        count--;
-        currentFolder = navigation.get(count)[0];
-        currentPath = navigation.get(count)[1];
-        setText();
-        refreshNaviItem();
-        folderItems = new ArrayList<>();
-        folderItems = listFolder.get(count);
-
-        if (count == 0) goBack.setImageResource(android.R.drawable.ic_menu_close_clear_cancel); //если возвращаемся в Домашнюю папку, кнопка Назад становится крестиком
-        startAdapter(folderItems);
-    }
-
-    public void startAdapter(List<Item> folderItems) {
+    private void startAdapter(List<Item> folderItems) {                                             //запускает отрисовку ресайклерВью для отображения папок и файлов
         FileListAdapter adapter = new FileListAdapter(parent, this, folderItems);
-        //currentAdapter = adapter;
         fileList.setAdapter(adapter);
-
-//        ItemListFragment.setCurrentAdapter(adapter);
     }
 
-
-
-    public void checkAll() {
-        int tempCount = 0;
-        int size = folderItems.size();
-        for (Item item : folderItems) { //1 цикл (проверяющий)
-            if (item.getFlag()) tempCount++;
-        }
-        if (tempCount == 0 || tempCount == size) {
-            for (Item item : folderItems) {
-                item.replaceFlag();
-            }
-        }
-        else {
-            for (Item item : folderItems) {
-                item.setFlag(true);
-            }
-        }
-        startAdapter(folderItems);
+    private String getFileExtension(File element) {                                                 //метод возвращает расширение принимаемого Файла
+        String fileName = element.getName();                                                        //создаётся результирующая строка, которая хранит в себе имя принятого Файла
+        int index = fileName.lastIndexOf(".");                                                      //ищётся индекс символа точки (.) в имени Файла, которая находится первой с конца
+        if (index > 0) return fileName.substring(index + 1);                                        //если точка найдена, возвращаем всё, что находится после точки
+        else return "null";                                                                         //иначе возвращаем строку "null", то есть Файл у нас без расширения
     }
 
-    public int getCount() {
-        return count;
-    }
+            /** !
+    // проблема с вылетом NPE при переходе в пустую/несуществующую папку кроется здесь */
+    private List<Item> getNewItemsFrom(String path) {                                               //метод возвращает список элементов (папок и файлов), находящихся по переданному пути
+        File[] files = new File(path).listFiles();                                                  //создаётся массив, который получает все элементы из переданной директории как файлы
+        sort(files);                                                                                //сортировка элементов директории (файлов) по алфавиту
 
-    public void setPlayList(PlayList playList) {
-        this.playList = playList;
-    }
-
-//    public void createNewItem() {
-//        Item item = new Item();
-//    }
-
-    public String getFileExtension(File element) {
-        String fileName = element.getName();
-        int index = fileName.lastIndexOf(".");
-        if (index > 0) return fileName.substring(index + 1);
-        else return "null";
-    }
-
-    public List<Item> getNewItemsFrom(String path) {
-
-//        try (FileReader reader = new FileReader(path);
-//            Scanner scan = new Scanner(reader)) {
-//
-//        }
-//        catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-
-
-
-
-        File file = new File(path);
-
-//        String[] paths = file.list();
-//        if (paths == null) {return null;}
-//        sort(paths);
-
-        File[] files = file.listFiles();
-        sort(files);
-        //File[] files = convertToFileArray(paths);//new File[paths.length];
-
-        List<Item> itemArray = new ArrayList<>();
-        List<Item> folderArray= new ArrayList<>();
-        if (files != null) {
-            for (File element : files) {
-                if (element.isFile()) {
-                    String ext = getFileExtension(element);
-                    if (ext.equalsIgnoreCase("mp3")) {
-                        itemArray.add(new Item(true, element.toString(), ext));
-                    }
+        List<Item> itemArray = new ArrayList<>();                                                   //создаётся список для хранения только музыкальных файлов (на данный момент только mp3)
+        List<Item> folderArray= new ArrayList<>();                                                  //создаётся список для хранения только папок
+        if (files != null) {                                                                        //если созданный массив не пустой (т.е. в директории есть хотя бы 1 файл или папка)
+            for (File element : files) {                                                            //пробегаемся циклом по массиву и отделяем папки от файлов
+                if (element.isFile()) {                                                             //если элемент массива является файлом
+                    String ext = getFileExtension(element);                                         //тогда получаем у этого файла его расширение
+                    if (ext.equalsIgnoreCase("mp3")) {                                              //если расширение "mp3", то есть это звуковой файл
+                        itemArray.add(new Item(true, element.toString(), ext));                     //создаём объект Итем на базе этого файла, маркируем его как файл и добавляем его в
+                    }                                                                               //-- список файлов
                 }
-                else {
-                    folderArray.add(new Item(element.toString()));
+                else {                                                                              //если элемент является папкой
+                    folderArray.add(new Item(element.toString()));                                  //то так же создаём объект Итем на базе элемента и добавляем его в список папок
                 }
-
             }
-//            for (int i = 0; i < files.length; i++) {
-//                Item newItem = new Item(files[i].toString());
-//                if (files[i].isFile()) {
-//                    newItem.setIsFile(true);
-//
-//
-//                }
-//            itemList.add(newItem);  /** здесь куча проблем, надо через потоки получать список элементов директории */
-//            }
-
         }
-        else {
+        else {                                                                                      //иначе, если массив элементов пустой (директория пуста)
 //            Toast toast = Toast.makeText(parent, "Папка пуста", Toast.LENGTH_SHORT);
 //            toast.show();
             //folderArray.add(new Item(path, "Тут пусто, увы :("));
-            return folderArray;
+            return folderArray;                                                                     //возвращаем список папок (естественно, пустой) //надо это обработать, вылетает NPE
         }
 
         return joinLists(folderArray, itemArray);//itemList;
     }
 
-    public List<Item> joinLists(List<Item> list1, List<Item> list2) {
+    private List<Item> joinLists(List<Item> list1, List<Item> list2) {                              //метод соединяет списки папок и файлов и возвращает один список. Это нужно для
+                                                                                                    //-- того, чтобы сначала шли папки, а потом файлы
         for (Item item : list2) {
             list1.add(item);
         }
         return list1;
     }
 
-    public void sort(File[] pathsArray) {  //массив может быть нулл, надо это обработать
-        Comparator<File> comparator = new Comparator<File>() {
-            @Override
-            public int compare(File o1, File o2) {
-                return o1.getPath().compareToIgnoreCase(o2.getPath());
-            }
-        };
+            /** !
+    // массив может быть нулл, надо это обработать */
+    private void sort(File[] pathsArray) {                                                          //метод для сортировки массива элементов в алфавитном порядке
+        Comparator<File> comparator = (o1, o2) -> o1.getPath().compareToIgnoreCase(o2.getPath());
 //        String[] sortArray = new String[pathsArray.length];
 //        for (int i = 0; i < array.size(); i++) {
 //            sortArray[i] = array.get(i).getName();
@@ -358,115 +376,8 @@ public class FileListControl extends FileList {
         Arrays.sort(pathsArray, comparator);
     }
 
-
-    public void findFilesInFolder(Item item) {
-        List<Item> tempList = new ArrayList<>(getNewItemsFrom(item.getPath())); //можно не создавать список, а сразу его использовать
-        for (Item tempItem : tempList) {
-            addTracks(tempItem);
-        }
-    }
-
-    public void fillPlayList() {
-
-        for (Item item : folderItems) {
-            if (item.getFlag()) {
-                addTracks(item);
-            }
-        }
-
-        //super.onBackPressed();
-
-
-        if (playList.getCountTracks() == 0) {
-            Toast toast = Toast.makeText(inflater.getContext(), "Музыка не найдена!", Toast.LENGTH_SHORT);
-            toast.show();
-        }
-        else {
-            Toast toast = Toast.makeText(inflater.getContext(), "Музыка успешно добавлена!", Toast.LENGTH_SHORT);
-            toast.show();
-            //тут надо добавить сравнение, чтобы не допустить одинаковых песен
-            App.getPlayer().savePlayLists();
-        }
-
-    }
-
-    public void addTracks(Item item) {
-
-        if (item.isFile()) playList.addTrack(item.getName(), item.getPath());
-        else {
-            findFilesInFolder(item);
-
-        }
-    }
-
-    public void serializePlayList() {
-
-    }
-
-
-
 }
 
 
-    /**
-     * СТАРЫЙ КОД (ЗАКОММЕНТИРОВАННЫЙ)
-     **/
-
-
-//    public void refreshFileList(RecyclerView fileList, List<Item> paths) {
-//        FileListAdapter adapter = new FileListAdapter(context, paths);
-//        fileList.setAdapter(adapter);
-//    }
-
-//    public File[] convertToFileArray(String[] paths) {
-//        File[] fileArray = new File[paths.length];
-//        for (int i = 0; i < paths.length; i++) {
-//            fileArray[i] = new File(paths[i]);
-//        }
-//        return fileArray;
-//    }
-
-//    public void clickOnViewHolder(int position) {
-//        if (folderItems.get(position).getIsFile()) {
-//            Item item = folderItems.get(position);
-//            currentAdapter.ViewHolder checkBox.setChecked(item.replaceFlag());
-//        }
-//        else {
-//            for(Item item : folderItems) {
-//                item.setFlag(false);
-//            }
-//            goToNext(position);
-//        }
-//    }
-
-//    public static void nextNavigation(String path) {
-//        navigation.add(path);
-//    }
-
-//    public static void prevNavigation() {
-//        int lastIndex = navigation.size() - 1;
-//        navigation.remove(lastIndex);
-//    }
-
-
-
-//    public void goToNext(String path) {
-//        count++;
-//
-//    }
-
-//    public static String getCurrentPath() {
-//        int lastIndex = navigation.size() - 1;
-//        return navigation.get(lastIndex);
-//    }
-
-//    public void initRecyclerView() {
-//        fileList = view.findViewById(R.id.rv_file_list);
-//        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(parent);
-//        fileList.setLayoutManager(layoutManager);
-//        FileListAdapter adapter = new FileListAdapter(parent, view, fileList, FileList.getFirstPaths());
-//        fileList.setAdapter(adapter);
-//
-//        currentAdapter = adapter;
-//    }
+    /** СТАРЫЙ КОД (ЗАКОММЕНТИРОВАННЫЙ) */
 

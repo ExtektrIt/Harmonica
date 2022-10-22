@@ -12,36 +12,20 @@ import com.andrey.guryanov.harmonica.utils.App;
 
 public class TrackList extends AppCompatActivity {
 
-    private App app;
     private PlayList playList;
     private RecyclerView trackList;
     private TextView playListName, countTracks;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_track_list);
 
         playList = App.getPlayer().getCurrentPlayList();
-
-        //this.playList = App.getPlayer().getCurrentPlayList();
         initViews();
-        //getBundleArgs();
-
         startAdapter();
-
     }
-
-//    protected void getBundleArgs() {  //test
-//        Bundle arguments = getIntent().getExtras();
-//
-//        PlayList playList;
-//        if (arguments != null) {
-//            playList = (PlayList) arguments.getSerializable("PlayList");
-//            this.playList = playList;
-//        }
-//    }
 
     protected void initViews() {
         trackList = findViewById(R.id.rv_track_list);
@@ -55,10 +39,14 @@ public class TrackList extends AppCompatActivity {
         trackList.setLayoutManager(layoutManager);
     }
 
-    public void startAdapter() {
+    private void startAdapter() {
         TrackListAdapter adapter = new TrackListAdapter(this, playList);
         trackList.setAdapter(adapter);
     }
+
+
+    /** ТОЧКИ ВЗАИМОДЕЙСТВИЯ (ИНТЕРФЕЙС ПОЛЬЗОВАТЕЛЯ) */
+
 
     public void refresh(View view) {
         startAdapter();
@@ -66,8 +54,11 @@ public class TrackList extends AppCompatActivity {
 
     public void goToTitleScreen(View view) {
         super.onBackPressed();
-//        Intent intent = new Intent(this, MainActivity.class);
-//        startActivity(intent);
     }
 
 }
+
+
+    /** СТАРЫЙ КОД (ЗАКОММЕНТИРОВАННЫЙ) */
+
+

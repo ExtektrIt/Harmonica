@@ -43,15 +43,13 @@ public class FileList extends AppCompatActivity {
         showHomeFolders();
     }
 
-    private void requestPermissionsToReadFS() {
+    private void requestPermissionsToReadFS() {                                                     //метод запрашивает разрешение на чтение файловой системы, если оно ещё не предоставлено
         if (Permission.hasPermissions(this)) return;
         Permission.requestPermissions(this, PERMISSION_STORAGE);
     }
 
 
-    /**
-     * ИНИЦИАЛИЗАЦИЯ ПЕРЕМЕННЫХ
-     **/
+    /** ИНИЦИАЛИЗАЦИЯ ПЕРЕМЕННЫХ */
 
 
     private void initViews () {
@@ -61,9 +59,9 @@ public class FileList extends AppCompatActivity {
         goBack = findViewById(R.id.ibtn_go_back);
         btnCheckAll = findViewById(R.id.ibtn_check_all);
         btnDone = findViewById(R.id.ibtn_done);
-        folderPath.setSelected(true);                                                               //запускает анимацию прокрутки текста слева-направо
-
         goToTitleScreen = findViewById(R.id.ibtn_go_to_title_screen);
+
+        folderPath.setSelected(true);                                                               //запускает анимацию прокрутки текста слева-направо
     }
 
     private void initRecyclerView() {
@@ -80,18 +78,18 @@ public class FileList extends AppCompatActivity {
         args.add(btnDone);
     }
 
-    private void showHomeFolders() {
-        controller.startAdapter(controller.getHomeFolders());                                       //создание адаптера для RecyclerView (первое, с домашними папками)
-    }
-
     protected void initController() {
         controller = new FileListControl(this, fileList, args);
     }
 
+            /** !
+    // нужна проверка на инициализацию класса, чтобы папки не сбивались при переворачивании экрана */
+    private void showHomeFolders() {
+        controller.showHomeFolders();                                                               //загружает или создаёт, а после отображает домашние папки
+    }
 
-    /**
-     * КНОПКИ НАВИГАЦИИИ
-     **/
+
+    /** КНОПКИ НАВИГАЦИИИ */
 
 
     public void goToTitleScreen(View v) {
@@ -103,26 +101,22 @@ public class FileList extends AppCompatActivity {
             controller.returnToPrevFolder();
         }
         else super.onBackPressed();
-
     }
 
     @Override
     public void onBackPressed() {
         goBack(goBack);
-        //super.onBackPressed();
     }
 
 
-    /**
-     * ФУНКЦИОНАЛЬНЫЕ КНОПКИ
-     **/
+    /** ФУНКЦИОНАЛЬНЫЕ КНОПКИ */
 
 
     public void selectAll(View view) {
-        controller.checkAll();
+        controller.selectAll();
     }
 
-    public void done(View view) {   //при выполнении этого метода мы точно знаем, что плейлист уже создан. Сами плейлисты должны создаваться в других активностях
+    public void done(View view) {
         controller.fillPlayList();
 
         super.onBackPressed();
@@ -131,78 +125,4 @@ public class FileList extends AppCompatActivity {
 }
 
 
-    /**
-     * СТАРЫЙ КОД (ЗАКОММЕНТИРОВАННЫЙ)
-     **/
-
-
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-//        if (requestCode == PERMISSION_STORAGE) {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-//                if (PermissionUtils.hasPermissions(this)) {
-//                    tvPermission.setText("Разрешение получено");
-//                } else {
-//                    tvPermission.setText("Разрешение не предоставлено");
-//                }
-//            }
-//        }
-//        super.onActivityResult(requestCode, resultCode, data);
-//    }
-
-//    protected void initAdapter(List<Item> paths) {
-////        FileListAdapter adapter = new FileListAdapter(this, paths);
-////        fileList.setAdapter(adapter);
-//
-////        FileListControl control = new FileListControl(this);
-////        control.refreshFileList(fileList ,paths);
-//
-////        ArrayAdapter<Item> adapter = new ArrayAdapter<>(this, R.layout.file_list_item, R.id.tv_file_name, paths);
-////        folderList.setAdapter(adapter);
-//    }
-
-//    public RecyclerView getFileList() {
-//        return fileList;
-//    }
-
-//    public List<TextView> getText() {
-//        return textArgs;
-//    }
-
-//    public void setNames() {
-//        folderPath.setText(path);
-//        folderPath.setText(name);
-//    }
-//
-//    public void setCurrentFolderName(String newName, String newPath) {
-////        folderName = findViewById(R.id.tv_folder_name);
-////        folderPath = findViewById(R.id.tv_folder_path);
-////
-////        folderName.setText(newName);
-////        folderPath.setText(newPath);
-////        folderPath.setText();
-//        this.name = newName;
-//        this.path = newPath;
-//        setNames();
-//    }
-
-//    public TextView getFolderName() {
-//        return folderName;
-//    }
-
-//    public void initFragment() {;
-//        Fragment fragment = new ItemListFragment(this);
-//        FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-//        fragmentTransaction.replace(R.id.fl_fragment_place, fragment);
-//        fragmentTransaction.commit();
-//    }
-
-//    public void initRecyclerView() {
-//        fileList = view.findViewById(R.id.rv_file_list);
-//        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(parent);
-//        fileList.setLayoutManager(layoutManager);
-//        FileListAdapter adapter = new FileListAdapter(parent, view, fileList, FileList.getFirstPaths());
-//        fileList.setAdapter(adapter);
-//
-//        currentAdapter = adapter;
-//    }
+    /** СТАРЫЙ КОД (ЗАКОММЕНТИРОВАННЫЙ) */

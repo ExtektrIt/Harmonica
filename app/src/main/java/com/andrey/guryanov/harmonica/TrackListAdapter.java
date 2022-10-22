@@ -17,32 +17,21 @@ import java.util.List;
 
 public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.ViewHolder> {
 
-    private final List<Track> tracks;
+    private final List<Track> tracks;                                                               //список треков
     private final LayoutInflater inflater;
-    private final Context parent;
     private final int COLOR_APP = Color.parseColor("#55dddd");
     private final int COLOR_WHITE = Color.parseColor("#ffffff");
 
-    private ViewHolder currentHolder;   //текущий (выделенный) ВьюХолдер
-    //private Drawable defaultColor;
-
-    //private int currentPosition;    = -1; //в последствии заменю на булеву. дает понять, есть ли вообще в СонгЛисте выделенный ВьюХолдер
+    private ViewHolder currentHolder;                                                               //текущий (выделенный) холдер. нужен для того, чтобы знать, какой холдер уже выделен
     private boolean isFirstSelectedHolder;
-    private int viewHolderCount = 0;    //тестовый, считает созданные холдеры и записывает их в атрибуты песни
-    //private int none = -1;
-
-    //private Player player;
+    private int viewHolderCount = 0;                                                                //тестовый, считает созданные холдеры и записывает их в атрибуты песни
     private final PlayList playList;
 
 
     public TrackListAdapter(Context parent, PlayList playList) {
-        this.parent = parent;
         this.tracks = playList.getTracks();
         this.inflater = LayoutInflater.from(parent);
-        //this.player = player;
         this.playList = playList;
-        //currentPosition = -1;
-
     }
 
     @NonNull
@@ -50,27 +39,90 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
     public TrackListAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = inflater.inflate(R.layout.track_list, parent, false);
 
-        viewHolderCount++;  //тест
+        viewHolderCount++;                                                                          //тест
 
         ViewHolder newHolder = new ViewHolder(view);
-        newHolder.trackAttr.setText(String.valueOf(viewHolderCount));
+        newHolder.trackAttr.setText(String.valueOf(viewHolderCount));                               //тест
         return newHolder;
-        //return new ViewHolder(view, viewHolderCount);
     }
 
     @Override
     public void onBindViewHolder(@NonNull TrackListAdapter.ViewHolder holder, int position) {
         Track track = tracks.get(position);
-        //holder.songName.setText("Песня № " + position);//(track.getName());
         holder.trackName.setText(track.getName());
-        //holder.songAttr.setText(String.valueOf(viewHolderCount));  //test
-        //holder.songAttr.setBackgroundColor(holder.layout.getSolidColor());
-        //holder.layout.getBackground().
+
+        if (track.getID() == playList.getCurrentTrack().getID()) {                                  //если это текущий трек в плейлисте
+            selectHolder(holder);                                                                   //отображаем холдер как выделенный
+        }
+        else {
+            unSelectHolder(holder);                                                                 //иначе отображаем холдер как обычно (не выделенный)
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return tracks.size();
+    }
+
+
+    /** СЛУЖЕБНЫЕ МЕТОДЫ */
+
+
+    private void unSelectHolder(ViewHolder holder) {                                                //метод отменяет выбор холдера и отображает его как обычно (не выделенный)
+        holder.layout.setBackground(null);                                                          //сбрасываем цвет холдера на стандартный (зависит от темы) //костыль, но что поделать
+        holder.trackName.setTextColor(COLOR_APP);                                                   //меняем цвет названия трека на морской
+    }
+
+    private void selectHolder(ViewHolder holder) {                                                  //метод выделяет или отображает холдер как выбранный
+        currentHolder = holder;                                                                     //задаём этот холдер как текущий
+        holder.layout.setBackgroundColor(COLOR_APP);                                                //меняем цвет холдера на морской
+        holder.trackName.setTextColor(COLOR_WHITE);                                                 //меняем цвет названия трека в холдере на белый
+    }
 
 
 
-        if (track.getID() == playList.getCurrentTrack().getID()) {                                    //если это текущая песня в плейлисте
-            selectHolder(holder);
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        final TextView trackName, trackAttr;
+        final ConstraintLayout layout;
+        View view;
+
+        ViewHolder(View view){
+            super(view);
+            trackName = view.findViewById(R.id.tv_track_name);
+            trackAttr = view.findViewById(R.id.tv_track_attr);
+            this.view = view;
+            layout = view.findViewById(R.id.l_track_list);
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int position = getBindingAdapterPosition();                                     //узнаём позицию нажатого холдера
+                    Track track = tracks.get(position);                                             //получаем трек по позиции для взаимодействия с ним
+                    if (currentHolder != null) unSelectHolder(currentHolder);                       //если есть выбранный холдер, то отменяем его выбор
+                    selectHolder(getThisHolder());                                                  //выбираем текущий нажатый холдер
+                    if (track.getID() != playList.getCurrentTrack().getID()) {                      //если выбранный трек не является текущим
+                        playList.setCurrentTrack(track);                                            //задаём выбранный трек как текущий в плейлисте
+                        App.getPlayer().playFromTrackList();                                        //запускаем текущий трек плейлиста
+                    }
+                }
+            });
+        }
+
+        public ViewHolder getThisHolder() {
+            return this;
+        }
+    }
+
+}
+
+
+    /** СТАРЫЙ КОД (ЗАКОММЕНТИРОВАННЫЙ) */
+
+
+//holder.songAttr.setText(String.valueOf(viewHolderCount));  //test
+//holder.songAttr.setBackgroundColor(holder.layout.getSolidColor());
+//holder.layout.getBackground().
+
 //            holder.layout.setBackgroundColor(Color.parseColor("#55dddd"));   //цвет "app"
 //            holder.songName.setTextColor(Color.parseColor("#ffffff"));  //белый
 //            //holder.layout.setBackground();
@@ -78,17 +130,11 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
 //
 //            currentHolder = holder;
 
-            //holder.songName.setSelected(true);
+//holder.songName.setSelected(true);
 
-        }
-        else {
-            unSelectHolder(holder);
-//            holder.layout.setBackground(null); //КОСТЫЛЬ! задаём стандартный фон (видимо, в методе встроена проверка на нуль, что очень хорошо)
-//            holder.songName.setTextColor(Color.parseColor("#55dddd"));
-        }
 
-            //holder.layout.setBackgroundColor(R.color.background_theme);
-            //holder.layout.setBackgroundColor(R.color.white);   //пока что стандартный цвет ячейки будет таким, в будущем сделаю цвет текущей темы
+//holder.layout.setBackgroundColor(R.color.background_theme);
+//holder.layout.setBackgroundColor(R.color.white);   //пока что стандартный цвет ячейки будет таким, в будущем сделаю цвет текущей темы
 //        holder.checkBox.setChecked(item.getFlag());
 //        holder.checkBox.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -98,83 +144,17 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.View
 ////                toast.show();
 //            }
 //        });
-    }
 
-    @Override
-    public int getItemCount() {
-        return tracks.size();
-    }
+//layout.setBackgroundColor(R.color.app);
+//songName.setTextColor(R.color.white);
+//empty.setBackgroundColor(R.color.app);
 
-    public void unSelectHolder(ViewHolder holder) {
-        //currentHolder.
-        holder.layout.setBackground(null);
-        holder.trackName.setTextColor(COLOR_APP);
-    }
+//currentHolder.
 
-    public void selectHolder(ViewHolder holder) {
-        currentHolder = holder;
-        holder.layout.setBackgroundColor(COLOR_APP);
-        holder.trackName.setTextColor(COLOR_WHITE);
-        //layout.setBackgroundColor(R.color.app);
-        //songName.setTextColor(R.color.white);
-        //empty.setBackgroundColor(R.color.app);
-
-        //currentHolder.
-    }
-
-
-
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        final TextView trackName, trackAttr;
-        //final View layout;
-        final ConstraintLayout layout;
-        View view, empty;
-
-        ViewHolder(View view){
-
-            super(view);
-            trackName = view.findViewById(R.id.tv_track_name);
-            trackAttr = view.findViewById(R.id.tv_track_attr);
-
-            this.view = view;
-            layout = view.findViewById(R.id.l_track_list);
-            //empty = view.findViewById(R.id.v_song_list);
-
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    int position = getBindingAdapterPosition();
-                    Track track = tracks.get(position);
-
-                    if (currentHolder != null) unSelectHolder(currentHolder);                       //если есть выбранный холдер, то отменяем его выбор
-                    selectHolder(getThisHolder());
-
-                    if (track.getID() != playList.getCurrentTrack().getID()) {                        //если выбранная песня не является текущей
-                        playList.setCurrentTrack(track);                                              //задаём выбранную песню как текущую в плейлисте
-                        App.getPlayer().playFromTrackList();                                                     //запускаем текущую песню плейлиста
-                    }
-
-
-
-//                    Toast t = Toast.makeText(inflater.getContext(), "Песня запустилась! Ля-ля", Toast.LENGTH_SHORT);
-//                    t.show();
-
-                }
-            });
-
-
-        }
-        public ViewHolder getThisHolder() {
-            return this;
-        }
+//            holder.layout.setBackground(null); //КОСТЫЛЬ! задаём стандартный фон (видимо, в методе встроена проверка на нуль, что очень хорошо)
+//            holder.songName.setTextColor(Color.parseColor("#55dddd"));
 
 //        public void selectSong() {
 //            unSelectOldSong();
 //            selectThisSong();
 //        }
-
-
-
-    }
-
-}

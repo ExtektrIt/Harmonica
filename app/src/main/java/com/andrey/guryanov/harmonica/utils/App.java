@@ -9,52 +9,38 @@ import com.andrey.guryanov.harmonica.Player;
 import java.io.File;
 
 public class App extends Application {                                                              //Класс Апп. Объект этого класса создаётся только один раз. Его назначение - доступ
-                                                                                                    //--к Плееру из любой точки приложения через вызов статического метода
+                                                                                                    //-- к Плееру из любой точки приложения через вызов статического метода
     private static App[] app;                                                                       //статический массив, где хранится ссылка на этот объект. Массив нужен для того, чтобы
-                                                                                                    //--передавать нестатический объект этого класса в статическом методе
+                                                                                                    //-- передавать нестатический объект этого класса в статическом методе
     private static Context[] context;                                                               //статический массив с контекстом приложения. Нужен по тем же причинам, что и выше.
-    private boolean initPlayer;                                                                     //маркер, показывающий, создался ли уже объект класса Плеер. Нужен для того, чтобы
-                                                                                                    //--создавать объект Плеера только один раз
     private Player player;                                                                          //Объект класса Плеер. Создаётся в приложении только один раз (синглтон)
+
 
     @Override
     public void onCreate() {
         super.onCreate();
 
         init();                                                                                     //инициализируем статические массивы, чтобы объекты в них можно было вызывать из любой
-                                                                                                    // --точки приложения
-    }
+    }                                                                                               //-- точки приложения
 
 
-    /**
-     * СЛУЖЕБНЫЕ МЕТОДЫ
-     **/
+    /** СЛУЖЕБНЫЕ МЕТОДЫ */
 
 
     private void init() {
         context = new Context[]{getApplicationContext()};                                           //заносим в массив контекст приложения
         app = new App[]{this};                                                                      //заносим в массив ссылку на этот объект (this App)
+        player = new Player();                                                                      //создаём синглтон-объект Плеера
 
         Log.e("App", "App инициализировался!"); //тест
     }
 
-    private Player returnPlayer() {                                                                 //возвращает объект Плеера
-        if (!initPlayer) {                                                                          //если Плеер ещё не создан
-            createPlayer();                                                                         //создаём объект Плеера
-            initPlayer = true;                                                                      //говорим маркеру, что Плеер создан
-        }
-        //Log.e("App","Player инициализировался!");
-        return player;                                                                              //возвращаем новосозданный или созданный ранее Плеер
-    }
-
-    private void createPlayer() {
-        player = new Player();
+    private Player returnPlayer() {                                                                 //метод возвращает объект Плеера статическому геттеру. Нужен только для этого
+        return player;
     }
 
 
-    /**
-     * СТАТИЧЕСКИЕ ГЕТТЕРЫ
-     **/
+    /** СТАТИЧЕСКИЕ ГЕТТЕРЫ */
 
 
     public static App getApp() {
@@ -73,7 +59,7 @@ public class App extends Application {                                          
         return getAppDir() + "/PlayLists";
     }
 
-    public static String getPlayerStatePath() {                                                      //возвращает путь в папке приложения к файлу, в котором сохраняется состояние плеера
+    public static String getPlayerStatePath() {                                                     //возвращает путь в папке приложения к файлу, в котором сохраняется состояние плеера
         return getAppDir() + "/playerState.hps";
     }
 
@@ -88,144 +74,18 @@ public class App extends Application {                                          
 }
 
 
-    /**
-     * СТАРЫЙ КОД (ЗАКОММЕНТИРОВАННЫЙ)
-     **/
+    /** СТАРЫЙ КОД (ЗАКОММЕНТИРОВАННЫЙ) */
 
 
-//    public static void initViewsToPlayer(ArrayList<Object> viewsList) {
-//        getPlayer().initPlayer(viewsList);
+//            /** $
+//    // надо попробовать инициализировать Плеер прямиком в методе онКриейт */
+//    private void createPlayer() {
+//        player = new Player();
 //    }
 
-//    public boolean playerIsInit() {
-//        return initPlayer;
-//    }
-
-//    public static Player getPlayerOLD() {
-//        //Log.e("App","Player инициализировался!");
-//        if (initPlayer) return Loader.player;
-//        else {
-//            if (isFirstLaunch()) Loader.initPlayer();
-//            else Loader.loadPlayer();
-//            return Loader.player;
+//        if (!initPlayer) {                                                                          //если Плеер ещё не создан
+//            createPlayer();                                                                         //создаём объект Плеера
+//            initPlayer = true;                                                                      //говорим маркеру, что Плеер создан
 //        }
-//
-//    }
-
-//    public static Player getPlayer() {
-//        if ( ! initPlayer) {
-//            if (isFirstLaunch()) createPlayer();
-//            else loadPlayer();
-//            initPlayer = true;
-//        }
-//        //Log.e("App","Player инициализировался!");
-//        return player;
-//
-//    }
-
-//    public void createViewArray() {
-//        viewArray = new ArrayList<>();
-//    }
-//
-//    public ArrayList<Object> getViews() {
-//        return viewArray;
-//    }
-//
-//    public void giveViewsToPlayer() {
-//        player.initViewsToPlayer(viewArray);
-//    }
-//
-//    public void showInfo() {
-//        player.showSongInfo();
-//    }
-
-//    public void loadPlayerState() {
-//        //player =
-//        // Player tempPlayer;
-//        try {
-//            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(
-//                    getPlayerDataPath()));
-//
-////            int playListsCount = ois.readInt();
-////            for (int i = 0; i < playListsCount; i++) {
-////                playLists.add((PlayList) ois.readObject());
-////            }
-//            //player = (Player) ois.readObject();
-//
-//            player.getCurrentPlayList().setCurrentSong((Track) ois.readObject());
-//            player.getCurrentPlayList().setSongsPlayedCount(ois.readInt());
-//            player.setIsPlaying(ois.readBoolean());
-//            player.setIsStopped(ois.readBoolean());
-//            player.seekTo(ois.readInt());
-//
-//            ois.close();
-//        }
-//        catch (Exception e) {
-//            e.printStackTrace();
-//            Log.e("main","error: " + e.getMessage());
-//        }
-//
-//    }
-
-//    public void savePlayerState() {
-//        try {
-//            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(
-//                    getPlayerDataPath()));
-//
-////            int playListsCount = ois.readInt();
-////            for (int i = 0; i < playListsCount; i++) {
-////                playLists.add((PlayList) ois.readObject());
-////            }
-//            //oos.writeObject(player);
-//            oos.writeObject(player.getCurrentSong());
-//            oos.writeInt(player.getCurrentPlayList().getSongsPlayedCount());
-//            oos.writeBoolean(player.isPlaying());
-//            oos.writeBoolean(player.isStopped());
-//            oos.writeInt(player.getElapsedTime());
-//
-//
-//            oos.close();
-//        }
-//        catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-//    public static Activity[] changeCurrentActivity() {
-//        return currentActivity;
-//    }
-
-
-//
-//
-//
-//    private static class Loader {
-//        @SuppressLint("StaticFieldLeak")
-//        private static final Player player = new Player();
-//        //private static final ArrayList<Object> viewArray;
-//        //private static final ArrayList<Object> viewArray = new ArrayList<>();
-//
-//        static void initPlayer() {
-//            player = new Player();
-//        }
-//
-//        static void loadPlayer() {
-//            //player =
-//            try {
-//                ObjectInputStream ois = new ObjectInputStream(new FileInputStream(
-//                        playListDir.getPath() + "/playlists.hpl"));
-//
-//                int playListsCount = ois.readInt();
-//                for (int i = 0; i < playListsCount; i++) {
-//                    playLists.add((PlayList) ois.readObject());
-//                }
-//
-//                ois.close();
-//            }
-//            catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
-
-
+//private boolean initPlayer;                                                                     //маркер, показывающий, создался ли уже объект класса Плеер. Нужен для того, чтобы
+//-- создавать объект Плеера только один раз

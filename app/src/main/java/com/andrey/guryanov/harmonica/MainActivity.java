@@ -30,15 +30,14 @@ public class MainActivity extends AppCompatActivity {
     private TextView title, artist, elapsed, duration, remainder;
     private TextView trackInfo;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //initApp();
         initViews();
         initPlayer();
-
 
         Log.e("main","main reCreated!");
 
@@ -55,19 +54,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {                                                                       //переопределил для сохранения состояния плеера (текущий трек, состояние и т.д.) в файл
-//        Toast t = Toast.makeText(this, "Плеер закрыт!", Toast.LENGTH_LONG);
-//        t.show();
         Log.e("main", "main destroyed!");
-//        System.exit(0);
-        //app.savePlayer();
         player.savePlayerState();                                                                   //сохраняет состояние плеера в файл
         super.onStop();
     }
 
 
-    /** ИНИЦИАЛИЗАЦИЯ
-     *
-     **/
+    /** ИНИЦИАЛИЗАЦИЯ */
 
 
     protected void initViews() {                                                                    //поиск и присваивание элементов Вью
@@ -87,11 +80,10 @@ public class MainActivity extends AppCompatActivity {
 
         Log.e("main","title = " + title);
         Log.e("main","initViews");
-
     }
 
     protected void initPlayer() {
-        player = App.getPlayer();                                                                   //получение ссылка на Плеер
+        player = App.getPlayer();                                                                   //получение ссылки на Плеер
 
         ArrayList<Object> viewArray = new ArrayList<>();                                            //создаём список элементов Вью для отправки их в Плеер для взаимодействия с ними оттуда
         viewArray.add(title);       //0
@@ -105,16 +97,14 @@ public class MainActivity extends AppCompatActivity {
 
         player.initPlayer(viewArray);                                                               //отправляем список Вью в Плеер, тем самым инициализируя его
 
-        if (player.getCurrentTrack().getID() != 0) {                                                //если текущая песня в Плеере задана
-            player.showTrackInfo();                                                                 //отображает данные текущей песни на экране
+        if (player.getCurrentTrack().getID() != 0) {                                                //если текущий трек в Плеере задан
+            player.showTrackInfo();                                                                 //отображает данные текущего трека на экране
             player.changePlayButton();                                                              //метод меняет иконку кнопки Плей в зависимости от состояния Плеера (на паузе или играет)
         }
     }
 
 
-    /** НАВИГАЦИЯ И УПРАВЛЕНИЕ
-     *
-     **/
+    /** НАВИГАЦИЯ И УПРАВЛЕНИЕ */
 
 
     public void goToFileList(View v) {                                                              //переход в проводник для добавления треков в плейлист
@@ -126,7 +116,6 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, TrackList.class);
         startActivity(intent);
     }
-
 
     public void playTrack(View v) {                                                                 //запускаем либо приостанавливаем трек
         player.playFromMain();                                                                      //метод для запуска/паузы песни из Мейна, внутри которого встроены проверки состояния
@@ -143,9 +132,7 @@ public class MainActivity extends AppCompatActivity {
 }
 
 
-    /** СТАРЫЙ КОД (ЗАКОММЕНТИРОВАННЫЙ)
-     *
-     **/
+    /** СТАРЫЙ КОД (ЗАКОММЕНТИРОВАННЫЙ) */
 
 
 //    protected void buildViewArray() {
@@ -177,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
 //        app.getViews().add(trackInfo);      //7
 //        app.giveViewsToPlayer();                                                                    //отправляет заполненный массив с Вьюшками в плеер
 //
-//        if (player.getCurrentTrack().getID() != 0) {                                                 //если текущая песня задана
+//        if (player.getCurrentTrack().getID() != 0) {                                                //если текущая песня задана
 //            app.showInfo();                                                                         //отображает данные текущей песни на экране
 //            player.changePlayButton();                                                              //нужен для того, чтобы при перевороте экрана кнопка плей отображалась корректно
 //        }
