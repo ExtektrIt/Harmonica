@@ -7,46 +7,123 @@
     tools:context=".MainActivity">
 
     <LinearLayout
+
         android:id="@+id/linearLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="30dp"
-        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_marginHorizontal="00dp"
+        android:layout_marginBottom="50dp"
         android:background="@color/app"
+        android:orientation="horizontal"
+        android:rotationX="0"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
         <ImageButton
-            android:id="@+id/ib_prevTrack_button"
+            android:id="@+id/ib_change_play_mode2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="14dp"
+            android:layout_marginEnd="0dp"
+            android:onClick="changePlayMode"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ib_prevTrack_button"
+            app:srcCompat="@android:drawable/ic_menu_rotate" />
+
+        <ImageButton
+            android:id="@+id/ib_prevTrack_button2"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:layout_margin="10dp"
-            android:layout_weight="1"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="20dp"
             android:contentDescription="@string/app_name"
             android:onClick="prevTrack"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ib_playTrack_button"
             app:srcCompat="@android:drawable/ic_media_previous" />
 
         <ImageButton
-            android:id="@+id/ib_playTrack_button"
+            android:id="@+id/ib_playTrack_button2"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:layout_marginHorizontal="10dp"
-            android:layout_weight="1"
+            android:layout_marginBottom="30dp"
             android:contentDescription="@string/app_name"
             android:onClick="playTrack"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+
             app:srcCompat="@android:drawable/ic_media_play" />
 
         <ImageButton
-            android:id="@+id/ib_nextTrack_button"
+            android:id="@+id/ib_nextTrack_button2"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:layout_margin="10dp"
-            android:layout_weight="1"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="8dp"
             android:contentDescription="@string/app_name"
             android:onClick="nextTrack"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/ib_playTrack_button"
             app:srcCompat="@android:drawable/ic_media_next" />
+
+        <ImageButton
+            android:id="@+id/ib_go_to_track_list2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="14dp"
+            android:contentDescription="@string/app_name"
+            android:onClick="goToTrackList"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/ib_nextTrack_button"
+            app:srcCompat="@android:drawable/ic_menu_sort_by_size" />
+
+
     </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/ib_prevTrack_button"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:contentDescription="@string/app_name"
+        android:onClick="prevTrack"
+        app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
+        app:layout_constraintTop_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toStartOf="@+id/ib_playTrack_button"
+        android:layout_marginEnd="20dp"
+        app:srcCompat="@android:drawable/ic_media_previous" />
+
+    <ImageButton
+        android:id="@+id/ib_playTrack_button"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:contentDescription="@string/app_name"
+        android:onClick="playTrack"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
+        app:layout_constraintTop_toTopOf="@+id/linearLayout"
+        app:srcCompat="@android:drawable/ic_media_play" />
+
+    <ImageButton
+        android:id="@+id/ib_nextTrack_button"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:contentDescription="@string/app_name"
+        android:onClick="nextTrack"
+        android:layout_marginStart="20dp"
+        app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
+        app:layout_constraintTop_toTopOf="@+id/linearLayout"
+        app:layout_constraintStart_toEndOf="@+id/ib_playTrack_button"
+        app:srcCompat="@android:drawable/ic_media_next" />
 
     <SeekBar
         android:id="@+id/sb_seekBar"
@@ -94,33 +171,45 @@
         android:singleLine="true"
         android:scrollHorizontally="true"
         android:text="Artist"
-        android:layout_marginBottom="200dp"
+        android:layout_marginBottom="100dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout" />
+
+    <TextView
+        android:id="@+id/tv_track_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="@color/app"
+        android:textAlignment="center"
+        android:text="[ ]"
+        android:layout_marginBottom="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout" />
 
     <ImageButton
         android:id="@+id/ib_go_to_track_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="44dp"
+        android:layout_marginStart="10dp"
         android:contentDescription="@string/app_name"
         android:onClick="goToTrackList"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
+        app:layout_constraintTop_toTopOf="@+id/linearLayout"
+        app:layout_constraintStart_toEndOf="@+id/ib_nextTrack_button"
         app:srcCompat="@android:drawable/ic_menu_sort_by_size" />
 
     <ImageButton
-        android:id="@+id/ib_scan_tracks"
+        android:id="@+id/ib_change_play_mode_"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginBottom="44dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_search"
-        android:onClick="goToFileList" />
+        android:layout_marginEnd="10dp"
+        app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
+        app:layout_constraintTop_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toStartOf="@+id/ib_prevTrack_button"
+        app:srcCompat="@android:drawable/ic_menu_send" />
 
     <ImageButton
         android:id="@+id/ib_menu"
@@ -128,6 +217,7 @@
         android:layout_height="50dp"
         android:layout_marginTop="10dp"
         android:layout_marginStart="10dp"
+        android:onClick="openTestFunc"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@android:drawable/ic_dialog_dialer" />
@@ -136,23 +226,23 @@
         android:id="@+id/tv_current_play_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="170dp"
+        android:layout_marginBottom="60dp"
         android:layout_marginStart="15dp"
         android:textSize="16sp"
         android:textColor="@color/app"
         android:text="--:--"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/tv_remainder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="170dp"
+        android:layout_marginBottom="60dp"
         android:textSize="16sp"
         android:textColor="@color/app"
         android:text="--:--"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -160,24 +250,46 @@
         android:id="@+id/tv_duration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="170dp"
+        android:layout_marginBottom="60dp"
         android:layout_marginEnd="15dp"
         android:textSize="16sp"
         android:textColor="@color/app"
         android:text="--:--"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
-        android:id="@+id/tv_test_track_info"
+        android:id="@+id/tv_play_mode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
-
-        android:text="TrackInfo"
+        android:text=" "
+        android:textColor="@color/app"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+
+    <ImageButton
+        android:id="@+id/ib_repeat"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:layout_marginStart="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/ib_nextTrack_button"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        app:srcCompat="@android:drawable/ic_menu_sort_alphabetically" />
+
+    <ImageButton
+        android:id="@+id/ib_change_play_mode"
+        android:onClick="changePlayMode"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/ib_prevTrack_button"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        app:srcCompat="@android:drawable/ic_menu_rotate" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

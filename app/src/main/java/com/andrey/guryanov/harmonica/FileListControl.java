@@ -1,42 +1,21 @@
 package com.andrey.guryanov.harmonica;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.Application;
 import android.content.Context;
-import android.os.Build;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.andrey.guryanov.harmonica.utils.App;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Scanner;
 
 public class FileListControl extends FileList {
     /** ТуДу
@@ -154,7 +133,10 @@ public class FileListControl extends FileList {
         folderItems = new ArrayList<>(listFolder.get(count));
 //        folderItems = listFolder.get(count);
 
-        if (count == 0) goBack.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);     //если возвращаемся в Домашнюю папку, кнопка Назад становится крестиком
+        if (count == 0) {
+            goBack.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);     //если возвращаемся в Домашнюю папку, кнопка Назад становится крестиком
+
+        }
         startAdapter(folderItems);
     }
 
@@ -199,7 +181,7 @@ public class FileListControl extends FileList {
             toast.show();
                 /** !
             // тут надо добавить сравнение, чтобы не допустить одинаковых песен */
-            App.getPlayer().savePlayLists();                                                        //после добавления трека/ов сохраняем (перезаписываем) плейлист
+            App.getPlayer().savePlayList(playList);                                                        //после добавления трека/ов сохраняем (перезаписываем) плейлист
         }
 
     }
@@ -267,7 +249,7 @@ public class FileListControl extends FileList {
     }
 
     private void addTracks(Item item) {                                                             //метод добавляет в плейлист Трек на основе Итема, если Итем является муз. файлом
-        if (item.isFile()) playList.addTrack(item.getName(), item.getPath());                       //если Итем является файлом, то добавляем трек в плейлист на основе данных Итема
+        if (item.isFile()) playList.addTrack(item.getName(), item.getPath(), item.getExtension());                       //если Итем является файлом, то добавляем трек в плейлист на основе данных Итема
         else {                                                                                      //иначе (если Итем является папкой)
             findFilesInFolder(item);                                                                //вызываем метод поиска файлов и передаём туда директорию Итема (Итем же у нас папка)
         }

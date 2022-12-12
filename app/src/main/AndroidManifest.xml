@@ -15,6 +15,7 @@
 
     <application
         android:name=".utils.App"
+        android:screenOrientation="portrait"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -27,15 +28,18 @@
         tools:targetApi="31">
         <activity
             android:name=".TrackList"
+            android:screenOrientation="locked"
             android:exported="false" />
         <activity
             android:name=".testFunction"
             android:exported="false" />
         <activity
             android:name=".FileList"
+            android:screenOrientation="locked"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="locked"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

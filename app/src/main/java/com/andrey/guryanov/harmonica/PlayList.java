@@ -2,32 +2,27 @@ package com.andrey.guryanov.harmonica;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class PlayList implements Serializable {
 
-    private static final long serialVersionUID = 8906945642254162505L;
+//    private static final long serialVersionUID = 8906945642254162505L;
     private String name;                                                                            //название плейлиста
-
-    private Track currentTrack;                                                                     //текущий трек в этом плейлисте
-    private int duration;                                                                           //длительность текущего трека
-    private int elapsed;                                                                            //пройденное время текущего трека
-//    private boolean isPlaying;                                                                      //
-    private boolean isStopped;                                                                      //состояние плейлиста перед переключением (тру-остановлен, фолс-на паузе)
-
     private final List<Track> tracks;                                                               //список треков этого плейлиста
-    private int countTracks;                                                                        //количество треков в плейлисте
     private long lastUsedID;                                                                        //нужен для того, чтобы каждой добавляемой песне присваивать уникальный ID, который
                                                                                                     //-- никогда не использовался и уже никому не присвоится
-//    private int currentTrackID;
-//    private int prevTrackNumber;
+    //инфа по текущему плейлисту. Нужна только для того, чтобы загрузить её в плеер при инициализации
+
+    ////private Track currentTrack;  //можно хранить не сам объект, а указатель на него                 //текущий трек в этом плейлисте
     private int currentTrackNumber;
-//    private int nextTrackNumber;
+    private int elapsedTime;                                                                        //пройденное время текущего трека
+    private boolean isPlaying;                                                                      //
+    private boolean isStopped;                                                                      //состояние плейлиста перед переключением (тру-остановлен, фолс-на паузе)
+    private int countTracks;                                                                        //количество треков в плейлисте
     private int tracksPlayedCounter;                                                                //счетчик воспроизведённых треков, нужен для управления очередью
-
     private List<Integer> trackQueue;                                                               //очередь треков
-    private byte queueMode;                                                                         //режим очереди (0-последовательный, 1-случайно-последовательный, 2-абсолютно случайный)
-
+    private int playMode;                                                                           //режим очереди (0-последовательный, 1-случайно-последовательный, 2-абсолютно случайный)
 
     public PlayList(String name) {
         tracks = new ArrayList<>();
@@ -39,48 +34,49 @@ public class PlayList implements Serializable {
         countTracks = 0;
         lastUsedID = 0;
         tracksPlayedCounter = 0;
-        currentTrack = new Track("", "", 0);                                                        //задаём пустой трек как текущий, нужен для корректной работы с плейлистом
-        trackQueue = new ArrayList<>();
-    }
-
-
-    /** ЗАГРУЗКА И СОХРАНЕНИЕ СОСТОЯНИЯ */
-
-
-    public void saveState() {                                                                       //метод сохраняет состояние плеера в плейлист перед переключением на другой плейист
-
-    }
-
-    public void loadState() {                                                                       //метод загружает состояние плейлиста в плеер при переключении с другого плейлиста
-
+        //currentTrack = new Track("", "", "", 0);                                                    //задаём пустой трек как текущий, нужен для корректной работы с плейлистом
+        currentTrackNumber = -1;
+        trackQueue = new ArrayList<>();//!
+        playMode = 0;
     }
 
 
     /** УПРАВЛЕНИЕ ТРЕКАМИ */
 
 
-    public void addTrack(String name, String path) {                                                //метод создаёт новый объект Трек на основе аргументов и добавляет его в список треков
-        countTracks++;                                                                              //инкрементирует количество треков в плейлисте
-        tracks.add(new Track(name, path, generateNewId()));                                         //создаёт и добавляет трек в список треков
+    public void addTrack(String name, String path, String ext) {                                    //метод создаёт новый объект Трек на основе аргументов и добавляет его в список треков
+        tracks.add(new Track(name, path, ext, generateNewId()));                                    //создаёт и добавляет трек в список треков
         trackQueue.add(countTracks);                                                                //добавляет в очередь порядковый номер добавленного трека
+        countTracks++;                                                                              //инкрементирует количество треков в плейлисте
     }
 
-    public void deleteTrack(int position) {                                                         //метод удаляет трек из плейлиста
+//    public void addDemoTrack() {
+//        tracks.add(new Track());
+//    }
+
+    public void removeTrack(int position) {                                                         //метод удаляет трек из плейлиста
         Integer track = position;                                                                   //делаем
-        tracks.remove(position - 1);
+        tracks.remove(position);
         trackQueue.remove(track);
         countTracks--;
     }
 
-    public void setNextTrack() {                                                                    //метод задаёт следущий трек как текущий
-        tracksPlayedCounter++;
-        currentTrack = tracks.get(trackQueue.get(tracksPlayedCounter) - 1);
-    }
-
-    public void setPrevTrack() {                                                                    //метод задаёт предыдущий трек как текущий
-        tracksPlayedCounter--;
-        currentTrack = tracks.get(trackQueue.get(tracksPlayedCounter) - 1);
-    }
+//    public boolean switchTrack(int direction) {                                                     //метод переключает трек согласно очереди и направления (-1 - предыдущий, 1 - следующий)
+//        if (itsPossible(direction)) {                                                               //если переключение трека в указанном направлении возможно
+//            if (currentTrack == tracks.get(getCurrentTrackNumber() - 1 + direction)) {              //если текущий трек равен тому треку, на который хотим переключить
+//                tracksPlayedCounter += direction;                                                   //тогда меняем счётчик воспроизведённых треков на 1 согласно направления, чтобы потом
+//                                                                                                    //-- переключиться на другой трек согласно очереди, а не включать текущий трек повторно.
+//                //в будущем привяжу всё к очереди                                                   //-- Актуально потому, что треки можно переключать ещё и из ТрекЛиста //можно улучшить
+//                if (tracksPlayedCounter == 0 || tracksPlayedCounter == countTracks - 1) {           //если счётчик стал равен недопустимым значениям
+//                    return false;                                                                   //сообщаем о том, что переключить трек нельзя
+//                }
+//            }
+//            currentTrack = tracks.get(getCurrentTrackNumber() - 1 + direction);                     //берём очередной трек и ставим его как текущий (переключаем)
+//            tracksPlayedCounter += direction;                                                       //меняем счетчик воспроизведённых треков на 1 в зависимости от направления переключения
+//            return true;                                                                            //возвращаем результат о том, что всё переключилось как надо
+//        }
+//        else return false;                                                                          //иначе даём знать о том, что трек не переключился
+//    }
 
 
     /** ГЕТТЕРЫ */
@@ -89,11 +85,11 @@ public class PlayList implements Serializable {
     public int getCountTracks() {
         return countTracks;
     }
-
-    public int getTracksPlayedCount() {
-        return tracksPlayedCounter;
-    }
-
+//
+////    public int getTracksPlayedCount() {
+////        return tracksPlayedCounter;
+////    }
+//
     public String getName() {
         return name;
     }
@@ -102,53 +98,103 @@ public class PlayList implements Serializable {
         return tracks;
     }
 
-    public Track getCurrentTrack() {
-        return currentTrack;
-    }
+//    public Track getCurrentTrack() {
+//        return currentTrack;
+//    }
 
     public int getCurrentTrackNumber() {
         return currentTrackNumber;
+    }
+
+    public List<Integer> getQueue() {
+        return trackQueue;
+    }
+
+    public Object[] getInfo() {
+        Object[] info = new Object[10];
+        info[0] = name;
+        //info[1] = currentTrack;
+        info[2] = currentTrackNumber;
+        info[3] = elapsedTime;
+        info[4] = isPlaying;
+        info[5] = isStopped;
+        info[6] = tracksPlayedCounter;
+        info[7] = playMode;
+        return info;
     }
 
 
     /** СЕТТЕРЫ */
 
 
+//    public void refreshInfo() {
+//
+//    }
+
     public void rename(String newName) {
         this.name = newName;
     }
 
-    public void setTracksPlayedCount(int count) {
+    public void setTracksPlayedCounter(int count) {
         tracksPlayedCounter = count;
     }
 
-    public void setCurrentTrack(Track track) {
-        currentTrack = track;
-    }
-
-    public void setFirstTrackAsCurrent() {
-        currentTrack = tracks.get(0);
-    }
+//    public void setCurrentTrack(Track track) {
+//        currentTrack = track;
+//    }
 
 
     /** ПУБЛИЧНЫЕ СЛУЖЕБНЫЕ МЕТОДЫ */
 
 
-    public boolean itsPossible(byte direction) {                                                    //метод вычисляет, можно ли переключить трек в указанном направлении, и возвращает ответ
-        //return tracksPlayedCounter != 0 && tracksPlayedCounter != (countTracks - 1);
-        if (direction == -1) return tracksPlayedCounter != 0;                                       //если намерение переключить назад, то вернёт ТРУ, если это не первый трек в очереди
-        else return countTracks > 1 && tracksPlayedCounter != (countTracks - 1);                    //если намерение переключить вперёд, то вернёт ТРУ, если треков > 1 и трек не последний
-                                                                                                    //-- в очереди
+    public void saveStateToPlayList() {
+
     }
+
+//    public void setFirstTrackAsCurrent() {
+//        currentTrack = tracks.get(0);
+//    }
+
+//    public int getCurrentTrackNumber() {
+//        return trackQueue.get(tracksPlayedCounter);
+//    }
 
 
     /** СЛУЖЕБНЫЕ МЕТОДЫ */
 
 
+//    private void setSequenceMode() {
+//        Collections.sort(trackQueue);
+////        for (int i = 0; i < countTracks; i++) {
+////            trackQueue.add(i + 1);
+////        }
+//    }
+//
+//    private void setRandomSequenceMode() {
+//        Collections.shuffle(trackQueue);// = new ArrayList<>(countTracks);
+//
+//    }
+//
+//    private void setAbsoluteRandomMode() {
+//
+//    }
+//
+//    private boolean itsPossible(int direction) {                                                    //метод вычисляет, можно ли переключить трек в указанном направлении, и возвращает ответ
+//        if (direction < 0) return tracksPlayedCounter > 0;                                          //если намерение переключить назад, то вернёт тру, если это не первый трек в очереди
+//        else return countTracks > 1 && tracksPlayedCounter < (countTracks - 1);                     //если намерение переключить вперёд, то вернёт тру, если треков > 1 и трек не последний
+//                                                                                                    //-- в очереди
+//    }
+
     private long generateNewId() {                                                                  //метод инкрементирует последний использованный ИД и возвращает его
         lastUsedID++;
         return lastUsedID;
     }
+
+
+    // TEST!!!111
+
+
+
 
 }
 
@@ -170,5 +216,45 @@ public class PlayList implements Serializable {
 //    public void addTrackOLD(Track track) {
 //        countTracks++;
 //        tracks.add(song);
+//
+//    }
+
+//        if (temp != currentTrack) currentTrack = temp;                                              //если текущий трек не равен очередному, то зададим очередной трек как текущий
+//        else {                                                                                      //иначе, если очередной трек равен текущему
+//            currentTrack = tracks.get(trackQueue.get(tracksPlayedCounter + direction) - 1);         //снова вычисляем очередной трек относительно направления и задаём его как текущий
+//            tracksPlayedCounter += direction;
+//        }
+
+//    private void setCurrentTrackFromQueue(int direction) { }
+
+//    public boolean setNextTrack() {                                                                    //метод задаёт следущий трек как текущий
+//        int next = 1;
+//        if (itsPossible(next)) {
+//            setCurrentTrackFromQueue(next);
+//            tracksPlayedCounter++;//
+//            return true;
+//        }
+//    }
+//
+//    public void setPrevTrack() {                                                                    //метод задаёт предыдущий трек как текущий
+//        setCurrentTrackFromQueue(-1);
+//        tracksPlayedCounter--;//
+//    }
+
+//    public void switchPlayMode() {
+////        if (playMode == 2) playMode = 0;
+////        else playMode++;
+////        changePlayMode();
+//        if (playMode < 2) {
+//            playMode++;
+//            if (playMode == 1) {
+//                setRandomSequenceMode();
+//            }
+////            else setAbsoluteRandomMode();
+//        }
+//        else {
+//            playMode = 0;
+//            setSequenceMode();
+//        }
 //
 //    }

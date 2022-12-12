@@ -27,8 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton prev, playPause, next;
     private SeekBar seekBar;
     private Player player;
-    private TextView title, artist, elapsed, duration, remainder;
-    private TextView trackInfo;
+    private TextView title, artist, elapsed, duration, remainder, trackNumber, playMode;
 
 
     @Override
@@ -36,26 +35,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        App.setCurrentLocation(this.getLocalClassName());
         initViews();
         initPlayer();
 
         Log.e("main","main reCreated!");
 
-        playPause.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                if (!player.isStopped()) {
-                    player.stop();
-                }
-                return true;
-            }
-        });
+        playPauseLongListener();
+        nextLongListener();
+        prevLongListener();
     }
 
     @Override
     protected void onStop() {                                                                       //переопределил для сохранения состояния плеера (текущий трек, состояние и т.д.) в файл
-        Log.e("main", "main destroyed!");
-        player.savePlayerState();                                                                   //сохраняет состояние плеера в файл
+        Log.e("main", "main stopped!");
+        if (player.getCurrentPlayList().getCountTracks() > 0) player.savePlayerState();                            //сохраняет состояние плеера в файл
         super.onStop();
     }
 
@@ -73,8 +67,8 @@ public class MainActivity extends AppCompatActivity {
         elapsed = findViewById(R.id.tv_current_play_time);
         duration = findViewById(R.id.tv_duration);
         remainder = findViewById(R.id.tv_remainder);
-
-        trackInfo = findViewById(R.id.tv_test_track_info);                                          //тест пока
+        trackNumber = findViewById(R.id.tv_track_number);
+        playMode = findViewById(R.id.tv_play_mode);
 
         title.setSelected(true);                                                                    //нужно для того, чтобы запускалась прокрутка текста с названием трека
 
@@ -93,31 +87,64 @@ public class MainActivity extends AppCompatActivity {
         viewArray.add(seekBar);     //4
         viewArray.add(playPause);   //5
         viewArray.add(remainder);   //6
-        viewArray.add(trackInfo);   //7     test
+        viewArray.add(trackNumber); //7
+        viewArray.add(playMode);    //8
 
         player.initPlayer(viewArray);                                                               //отправляем список Вью в Плеер, тем самым инициализируя его
 
-        if (player.getCurrentTrack().getID() != 0) {                                                //если текущий трек в Плеере задан
+        if (player.getCurrentTrackNumber() >= 0) {                                                //если текущий трек в Плеере задан
             player.showTrackInfo();                                                                 //отображает данные текущего трека на экране
             player.changePlayButton();                                                              //метод меняет иконку кнопки Плей в зависимости от состояния Плеера (на паузе или играет)
         }
     }
 
 
+    /** СЛУШАТЕЛИ */
+
+
+    private void playPauseLongListener() {
+        playPause.setOnLongClickListener(v -> {
+            if (!player.isStopped()) {
+                player.stop();
+            }
+            return true;
+        });
+    }
+
+    private void nextLongListener() {
+        next.setOnLongClickListener(v -> {
+            player.rewindTrackTo10Sec(1);
+            return true;
+        });
+    }
+
+    private void prevLongListener() {
+        prev.setOnLongClickListener(v -> {
+            player.rewindTrackTo10Sec(-1);
+            return true;
+        });
+    }
+
+
     /** НАВИГАЦИЯ И УПРАВЛЕНИЕ */
 
 
-    public void goToFileList(View v) {                                                              //переход в проводник для добавления треков в плейлист
-        Intent intent = new Intent(this, FileList.class);
-        startActivity(intent);
-    }
 
     public void goToTrackList(View v) {                                                             //переход к списку треков
         Intent intent = new Intent(this, TrackList.class);
         startActivity(intent);
     }
 
+    public void changePlayMode(View v) {                                                            //меняет режим воспроизведения
+        player.switchPlayMode();
+    }
+
     public void playTrack(View v) {                                                                 //запускаем либо приостанавливаем трек
+        if (player.getCurrentPlayList().getCountTracks() < 1) {
+            DialogFragmentAddTracks dialog = new DialogFragmentAddTracks();
+            dialog.show(getSupportFragmentManager(), "007");
+            return;
+        }
         player.playFromMain();                                                                      //метод для запуска/паузы песни из Мейна, внутри которого встроены проверки состояния
     }
 
@@ -129,44 +156,16 @@ public class MainActivity extends AppCompatActivity {
         player.prev();
     }
 
+    //тест
+    public void openTestFunc(View v) {
+        Intent intent = new Intent(this, testFunction.class);
+        startActivity(intent);
+    }
+
+
 }
 
 
     /** СТАРЫЙ КОД (ЗАКОММЕНТИРОВАННЫЙ) */
 
 
-//    protected void buildViewArray() {
-//
-//        viewArray = new ArrayList<>();
-//        viewArray.add(title);       //0
-//        viewArray.add(artist);      //1
-//        viewArray.add(elapsed);     //2
-//        viewArray.add(duration);    //3
-//        viewArray.add(seekBar);     //4
-//        viewArray.add(playPause);   //5
-//        viewArray.add(remainder);   //6
-//
-//        viewArray.add(trackInfo);   //7
-////
-////            App.initMain = true;
-////            player.initViewsToPlayer(viewArray);
-////            Log.e("main","buildMain");
-////        }
-//        app.createViewArray();                                                                      //создает массив Вьюшек, чтобы их потом отправить в плеер для взаимодействия
-//        app.getViews().add(title);          //0
-//        app.getViews().add(artist);         //1
-//        app.getViews().add(elapsed);        //2
-//        app.getViews().add(duration);       //3
-//        app.getViews().add(seekBar);        //4
-//        app.getViews().add(playPause);      //5
-//        app.getViews().add(remainder);      //6
-//
-//        app.getViews().add(trackInfo);      //7
-//        app.giveViewsToPlayer();                                                                    //отправляет заполненный массив с Вьюшками в плеер
-//
-//        if (player.getCurrentTrack().getID() != 0) {                                                //если текущая песня задана
-//            app.showInfo();                                                                         //отображает данные текущей песни на экране
-//            player.changePlayButton();                                                              //нужен для того, чтобы при перевороте экрана кнопка плей отображалась корректно
-//        }
-//
-//    }

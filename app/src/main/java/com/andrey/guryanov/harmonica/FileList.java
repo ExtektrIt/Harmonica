@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.andrey.guryanov.harmonica.utils.App;
 import com.andrey.guryanov.harmonica.utils.Permission;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public class FileList extends AppCompatActivity {
 
         requestPermissionsToReadFS();
 
+        App.setCurrentLocation(this.getLocalClassName());
         initViews();
         initRecyclerView();
         initArgs();

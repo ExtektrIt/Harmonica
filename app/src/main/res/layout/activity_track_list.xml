@@ -10,17 +10,19 @@
         android:id="@+id/rv_track_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-
+        android:scrollbars="vertical"
+        android:scrollbarThumbVertical="@color/app"
+        android:scrollbarSize="@dimen/cardview_default_radius"
         android:layout_marginTop="50dp"
-        android:layout_marginBottom="115dp"/>
-
+        android:layout_marginBottom="130dp" />
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="80dp"
+        android:layout_marginBottom="50dp"
         android:background="@color/app"
-        android:layout_marginBottom="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -31,11 +33,10 @@
             android:layout_marginStart="10dp"
             android:layout_marginBottom="14dp"
             android:contentDescription="@string/app_name"
-            android:onClick="refresh"
+            android:onClick="goToFileList"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:visibility="invisible"
-            app:srcCompat="@android:drawable/ic_menu_sort_by_size" />
+            app:srcCompat="@android:drawable/ic_menu_add" />
 
         <ImageButton
             android:id="@+id/ib_go_to_file_list"
@@ -48,6 +49,60 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@android:drawable/ic_menu_sort_by_size" />
+
+        <ImageButton
+            android:id="@+id/ib_prevTrack_button_track_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:contentDescription="@string/app_name"
+            android:onClick="prev"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ib_playTrack_button_track_list"
+
+            app:srcCompat="@android:drawable/ic_media_previous" />
+
+        <ImageButton
+            android:id="@+id/ib_playTrack_button_track_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/app_name"
+            android:onClick="play"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+
+
+            app:srcCompat="@android:drawable/ic_media_play" />
+
+        <ImageButton
+            android:id="@+id/ib_nextTrack_button_track_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:contentDescription="@string/app_name"
+            android:onClick="next"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/ib_playTrack_button_track_list"
+            app:srcCompat="@android:drawable/ic_media_next" />
+
+        <TextView
+            android:id="@+id/tv_track_name_track_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="70dp"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            android:text="[ ]"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/ib_playTrack_button_track_list"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -73,4 +128,28 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:text="Count tracks"
         android:textSize="11sp"/>
+
+    <TextView
+        android:id="@+id/tv_play_mode_track_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="[ ]"
+        android:textColor="@color/app"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <ImageButton
+        android:id="@+id/ib_test"
+        android:onClick="testFunc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+        android:layout_marginEnd="10dp"
+        app:srcCompat="@android:drawable/ic_menu_manage" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
